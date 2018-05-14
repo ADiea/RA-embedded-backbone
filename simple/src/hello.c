@@ -11,6 +11,7 @@
 
 #define PTD0  0         /* Port PTD0, bit 0: FRDM EVB output to blue LED */
 #define PTC12 12        /* Port PTC12, bit 12: FRDM EVB input from BTN0 [SW2] */
+#define PTD15 15
 
 void WDOG_disable (void)
 {
@@ -48,12 +49,17 @@ int main(void)
   PTD->PDDR |= 1<<PTD0;        /* Port D0: Data Direction= output */
   PORTD->PCR[0] = 0x00000100;  /* Port D0: MUX = GPIO */
 
+  //PTD->PDDR |= 1<PTD15;
+  //PORTD->PCR[15] = 0x00000100;
+
   for(;;) {
     if (PTC->PDIR & (1<<PTC12)) {   /* If Pad Data Input = 1 (BTN0 [SW2] pushed) */
-      PTD-> PCOR |= 1<<PTD0;        /* Clear Output on port D0 (LED on) */
+     // PTD-> PCOR |= 1<<PTD15;        /* Clear Output on port D0 (LED on) */
+      PTD-> PCOR |= 1<<PTD0;
     }
     else {                          /* If BTN0 was not pushed */
-      PTD-> PSOR |= 1<<PTD0;        /* Set Output on port D0 (LED off) */
+      //PTD-> PSOR |= 1<<PTD15;        /* Set Output on port D0 (LED off) */
+      PTD-> PSOR |= 1<<PTD0;
     }
     counter++;
   }
