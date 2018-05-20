@@ -9,8 +9,13 @@
 
 #include "S32K144_small.h"    /* include peripheral declarations S32K144 */
 
-#define PTD0  0         /* Port PTD0, bit 0: FRDM EVB output to blue LED */
-#define PTC12 12        /* Port PTC12, bit 12: FRDM EVB input from BTN0 [SW2] */
+#define LED_BLUE   0          /* Port D, GPIO pin  0: FRDM EVB output to blue LED */
+#define LED_RED   15		  /* Port D, GPIO pin 15: FRDM EVB output to red LED */
+#define LED_GREEN 16 		  /* Port D, GPIO pin 16: FRDM EVB output to green LED */
+
+#define BTN_0 12              /* Port C, GPIO pin 12: FRDM EVB input from BTN0 [SW2] */
+#define BTN_1 13		      /* Port C, GPIO pin 13: FRDM EVB input from BTN1 [SW3] */
+
 
 void WDOG_disable (void)
 {
@@ -38,22 +43,43 @@ int main(void)
   int counter = 0;
 
   WDOG_disable();             /* Disable Watchdog in case it is not done in startup code */
+
                               /* Enable clocks to peripherals (PORT modules) */
   PCC-> PCCn[PCC_PORTC_INDEX] = PCC_PCCn_CGC_MASK; /* Enable clock to PORT C */
   PCC-> PCCn[PCC_PORTD_INDEX] = PCC_PCCn_CGC_MASK; /* Enable clock to PORT D */
-                               /* Configure port C12 as GPIO input (BTN 0 [SW2] on EVB) */
-  PTC->PDDR &= ~(1<<PTC12);    /* Port C12: Data Direction= input (default) */
-  PORTC->PCR[12] = 0x00000110; /* Port C12: MUX = GPIO, input filter enabled */
-                               /* Configure port D0 as GPIO output (LED on EVB) */
-  PTD->PDDR |= 1<<PTD0;        /* Port D0: Data Direction= output */
-  PORTD->PCR[0] = 0x00000100;  /* Port D0: MUX = GPIO */
+
+                               /* Configure port C, pin 12 as GPIO input (BTN 0 [SW2] on EVB) */
+  GPIOC->PDDR &= ~(1<<BTN_0);       /* Port C, pin 12: Data Direction= input (default)
+   	   	   	   	 	 	 	 	 	 	 	 	 	   MUX = GPIO, input filter enabled */
+  PORTC->PCR[BTN_0] = (eAF_pinGPIO << PCR_MUX) | (1 << PCR_PFE);
+
+  	  	  	  	  	  	  	   /* Configure port C, pin 13 as GPIO input (BTN 1 [SW3] on EVB) */
+  GPIOC->PDDR &= ~(1<<BTN_1);       /* Port C, pin 13: Data Direction= input (default)
+  	  	  	  	  	  	  	  	  	  	  	  	  	   MUX = GPIO, input filter enabled */
+  PORTC->PCR[BTN_1] = (eAF_pinGPIO << PCR_MUX) | (1 << PCR_PFE);
+
+                               /* Configure port D, pin 0 as GPIO output (blue LED on EVB) */
+  GPIOD->PDDR |= 1<<LED_BLUE;       /* Port D, pin 0: Data Direction= output
+  	  	  	  	  	  	  	  	  	  	  	  	  	  MUX = GPIO */
+  PORTD->PCR[0] = eAF_pinGPIO << PCR_MUX;
+
+  	  	  	  	  	  	  	   /* Configure port D, pin 15 as GPIO output (red LED on EVB) */
+  GPIOD->PDDR |= 1<<LED_RED;        /* Port D, pin 15: Data Direction= output
+  	  	  	  	  	  	  	  	  	  	  	  	  	   MUX = GPIO */
+  PORTD->PCR[15] = eAF_pinGPIO << PCR_MUX;
+
+								/* Configure port D, pin 16 as GPIO output (green LED on EVB) */
+  GPIOD->PDDR |= 1<<LED_GREEN;      /* Port D, pin 16: Data Direction= output
+  	  	  	  	  	  	  	  	  	  	  	  	  	   MUX = GPIO */
+  PORTD->PCR[16] = eAF_pinGPIO << PCR_MUX;
+
 
   for(;;) {
-    if (PTC->PDIR & (1<<PTC12)) {   /* If Pad Data Input = 1 (BTN0 [SW2] pushed) */
-      PTD-> PCOR |= 1<<PTD0;        /* Clear Output on port D0 (LED on) */
+    if (GPIOC->PDIR & (1<<BTN_0)) {   /* If Pad Data Input = 1 (BTN0 [SW2] pushed) */
+      GPIOD-> PCOR |= 1<<LED_BLUE;        /* Clear Output on port D0 (LED on) */
     }
-    else {                          /* If BTN0 was not pushed */
-      PTD-> PSOR |= 1<<PTD0;        /* Set Output on port D0 (LED off) */
+    else if(GPIOC->PDIR & (1<<BTN_1)) {                          /* If BTN0 was not pushed */
+      GPIOD-> PSOR |= 1<<LED_BLUE;        /* Set Output on port D0 (LED off) */
     }
     counter++;
   }
