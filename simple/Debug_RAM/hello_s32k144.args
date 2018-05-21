@@ -1,7 +1,7 @@
 "./src/startup_code/startup_S32K144.o"
 "./src/hello.o"
 -T
-"C:/Users/Maria/Desktop/Rinf_Academy/RA-embedded-backbone/simple/linker_scripts/S32K1xx_flash.ld"
+"C:/Users/Maria/Desktop/Rinf Academy/RA-embedded-backbone/simple/Project_Settings/Linker_Files/S32K1xx_ram.ld"
 -Wl,-Map,"hello_s32k144.map"
 -Xlinker
 --gc-sections

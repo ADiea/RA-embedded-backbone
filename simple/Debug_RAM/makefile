@@ -14,7 +14,6 @@ RM := rm -rf
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include subdir.mk
--include linker_scripts/subdir.mk
 -include src/subdir.mk
 -include src/startup_code/subdir.mk
 -include objects.mk
@@ -66,7 +65,7 @@ hello_s32k144.siz \
 all: warning-messages explicit-dependencies hello_s32k144.elf secondary-outputs
 
 # Tool invocations
-hello_s32k144.elf: $(OBJS) C:/Users/Maria/Desktop/Rinf_Academy/RA-embedded-backbone/simple/linker_scripts/S32K1xx_flash.ld $(USER_OBJS)
+hello_s32k144.elf: $(OBJS) C:/Users/Maria/Desktop/Rinf\ Academy/RA-embedded-backbone/simple/Project_Settings/Linker_Files/S32K1xx_ram.ld $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Executing target #3 $@'
 	@echo 'Invoking: Standard S32DS C Linker'

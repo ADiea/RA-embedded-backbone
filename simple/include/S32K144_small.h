@@ -44,7 +44,7 @@ typedef struct {
 #define PCC_PORTD_INDEX                          76
 
 /** PCC - Size of Registers Arrays */
-#define PCC_PCCn_COUNT                           116u
+#define PCC_PCCn_COUNT                           116u// 121 last register is at offset 0x1e4
 
 /** PCC - Register Layout Typedef */
 typedef struct {
@@ -56,7 +56,7 @@ typedef struct {
 /** Peripheral PCC base pointer */
 #define PCC                                      ((PCC_Type *)PCC_BASE)
 
-#define PCC_PCCn_CGC_MASK                        0x40000000u
+#define PCC_PCCn_CGC_MASK                        0x40000000u//1<<30
 
 //############################ GPIO(general purpose input/output) enable definitions ############################
 
@@ -72,16 +72,31 @@ typedef struct {
 } GPIO_Type, *GPIO_MemMapPtr;
 
 /** Peripheral PTC base address */
-#define PTC_BASE                                 (0x400FF080u)
+#define GPIOC_BASE                                 (0x400FF080u)
 /** Peripheral PTC base pointer */
-#define PTC                                      ((GPIO_Type *)PTC_BASE)
+#define GPIOC                                      ((GPIO_Type *)GPIOC_BASE)
 /** Peripheral PTD base address */
-#define PTD_BASE                                 (0x400FF0C0u)
+#define GPIOD_BASE                                 (0x400FF0C0u)
 /** Peripheral PTD base pointer */
-#define PTD                                      ((GPIO_Type *)PTD_BASE)
+#define GPIOD                                      ((GPIO_Type *)GPIOD_BASE)
 
 /** PORT - Size of Registers Arrays */
 #define PORT_PCR_COUNT                           32u
+
+
+typedef enum{
+	eAF_pinDisabled=0,
+	eAF_GPIO,
+	eAF_inAF2,
+	eAF_inAF3,
+	eAF_inAF4,
+	eAF_inAF5,
+	eAF_inAF6,
+	eAF_inAF7,
+}eAlternateFunction;
+
+#define PCR_MUX 8
+#define PCR_PFE 4 //Passive Filter Enable
 
 /** PORT - Register Layout Typedef */
 typedef struct {
