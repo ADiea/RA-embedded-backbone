@@ -14,6 +14,21 @@
 //we are on a 32bit arch so unsigned int should be a uint32
 typedef unsigned int uint32_t;
 typedef unsigned char uint8_t;
+typedef enum
+{
+	eAF_pinDisabled=0,
+	eAF_pinGPIO,
+	eAF_pinAF2,
+	eAF_pinAF3,
+	eAF_pinAF4,
+	eAF_pinAF5,
+	eAF_pinAF6,
+	eAF_pinAF7
+
+}eAlternateFunc;
+
+#define PCR_MUX 8
+#define PCR_PFE 4  //Passive filter enable
 
 //From S32K144.h
 
@@ -44,11 +59,11 @@ typedef struct {
 #define PCC_PORTD_INDEX                          76
 
 /** PCC - Size of Registers Arrays */
-#define PCC_PCCn_COUNT                           116u
+#define PCC_PCCn_COUNT                           121  //Last register is PCC_ENET at offset 0x1E4
 
 /** PCC - Register Layout Typedef */
 typedef struct {
-   uint32_t PCCn[PCC_PCCn_COUNT];              /**< PCC Reserved Register 0..PCC CMP0 Register, array offset: 0x0, array step: 0x4 */
+   uint32_t PCCn[PCC_PCCn_COUNT];   /**< PCC Reserved Register 0..PCC CMP0 Register, array offset: 0x0, array step: 0x4 */
 } PCC_Type, *PCC_MemMapPtr;
 
 /** Peripheral PCC base address */
@@ -56,29 +71,29 @@ typedef struct {
 /** Peripheral PCC base pointer */
 #define PCC                                      ((PCC_Type *)PCC_BASE)
 
-#define PCC_PCCn_CGC_MASK                        0x40000000u
+#define PCC_PCCn_CGC_MASK                        (1<<30)
 
 //############################ GPIO(general purpose input/output) enable definitions ############################
 
 /** GPIO - Register Layout Typedef */
 typedef struct {
    uint32_t PDOR;                              /**< Port Data Output Register, offset: 0x0 */
-    uint32_t PSOR;                              /**< Port Set Output Register, offset: 0x4 */
-    uint32_t PCOR;                              /**< Port Clear Output Register, offset: 0x8 */
-    uint32_t PTOR;                              /**< Port Toggle Output Register, offset: 0xC */
-    uint32_t PDIR;                              /**< Port Data Input Register, offset: 0x10 */
+   uint32_t PSOR;                              /**< Port Set Output Register, offset: 0x4 */
+   uint32_t PCOR;                              /**< Port Clear Output Register, offset: 0x8 */
+   uint32_t PTOR;                              /**< Port Toggle Output Register, offset: 0xC */
+   uint32_t PDIR;                              /**< Port Data Input Register, offset: 0x10 */
    uint32_t PDDR;                              /**< Port Data Direction Register, offset: 0x14 */
    uint32_t PIDR;                              /**< Port Input Disable Register, offset: 0x18 */
 } GPIO_Type, *GPIO_MemMapPtr;
 
 /** Peripheral PTC base address */
-#define PTC_BASE                                 (0x400FF080u)
+#define GPIOC_BASE                                 (0x400FF080u)
 /** Peripheral PTC base pointer */
-#define PTC                                      ((GPIO_Type *)PTC_BASE)
+#define GPIOC                                      ((GPIO_Type *)GPIOC_BASE)
 /** Peripheral PTD base address */
-#define PTD_BASE                                 (0x400FF0C0u)
+#define GPIOD_BASE                                 (0x400FF0C0u)
 /** Peripheral PTD base pointer */
-#define PTD                                      ((GPIO_Type *)PTD_BASE)
+#define GPIOD                                      ((GPIO_Type *)GPIOD_BASE)
 
 /** PORT - Size of Registers Arrays */
 #define PORT_PCR_COUNT                           32u
@@ -86,14 +101,14 @@ typedef struct {
 /** PORT - Register Layout Typedef */
 typedef struct {
   uint32_t PCR[PORT_PCR_COUNT];               /**< Pin Control Register n, array offset: 0x0, array step: 0x4 */
-    uint32_t GPCLR;                             /**< Global Pin Control Low Register, offset: 0x80 */
-    uint32_t GPCHR;                             /**< Global Pin Control High Register, offset: 0x84 */
-       uint8_t RESERVED_0[24];
-   uint32_t ISFR;                              /**< Interrupt Status Flag Register, offset: 0xA0 */
-       uint8_t RESERVED_1[28];
-   uint32_t DFER;                              /**< Digital Filter Enable Register, offset: 0xC0 */
-   uint32_t DFCR;                              /**< Digital Filter Clock Register, offset: 0xC4 */
-   uint32_t DFWR;                              /**< Digital Filter Width Register, offset: 0xC8 */
+  uint32_t GPCLR;                             /**< Global Pin Control Low Register, offset: 0x80 */
+  uint32_t GPCHR;                             /**< Global Pin Control High Register, offset: 0x84 */
+  uint8_t RESERVED_0[24];
+  uint32_t ISFR;                              /**< Interrupt Status Flag Register, offset: 0xA0 */
+  uint8_t RESERVED_1[28];
+  uint32_t DFER;                              /**< Digital Filter Enable Register, offset: 0xC0 */
+  uint32_t DFCR;                              /**< Digital Filter Clock Register, offset: 0xC4 */
+  uint32_t DFWR;                              /**< Digital Filter Width Register, offset: 0xC8 */
 } PORT_Type, *PORT_MemMapPtr;
 
 /** Peripheral PORTC base address */

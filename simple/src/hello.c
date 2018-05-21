@@ -9,8 +9,14 @@
 
 #include "S32K144_small.h"    /* include peripheral declarations S32K144 */
 
-#define PTD0  0         /* Port PTD0, bit 0: FRDM EVB output to blue LED */
-#define PTC12 12        /* Port PTC12, bit 12: FRDM EVB input from BTN0 [SW2] */
+#define LED_BLUE  0         /* Port PTD0, bit 0: FRDM EVB output to LED_BLUEue LED */
+#define LED_RED 15		/* Port PTD15, bit 15 : red LED */
+#define LED_GREEN 16		/* Port PTD16, bit 16 : green LED */
+
+
+#define BUTTON1 12        /* Port BUTTON, bit 12: FRDM EVB input from BTN0 [SW2] */
+#define BUTTON2 13		/* Port ptc13*/
+
 
 void WDOG_disable (void)
 {
@@ -22,8 +28,8 @@ void WDOG_disable (void)
 	  (void)WDOG->CNT;
 
 	  /* Initial write of WDOG configuration register:
-	   * enables support for 32-bit refresh/unlock command write words,
-	   * clock select from LPO, update enable, watchdog disabled */
+	   * enaLED_BLUEes support for 32-bit refresh/unlock command write words,
+	   * clock select from LPO, update enaLED_BLUEe, watchdog disaLED_BLUEed */
 	  WDOG->CS  = (uint32_t ) ( (1UL << WDOG_CS_CMD32EN_SHIFT)                       |
 	                            (FEATURE_WDOG_CLK_FROM_LPO << WDOG_CS_CLK_SHIFT) 	 |
 	                            (0U << WDOG_CS_EN_SHIFT)                             |
@@ -36,25 +42,59 @@ void WDOG_disable (void)
 int main(void)
 {
   int counter = 0;
+  int i=0;
 
-  WDOG_disable();             /* Disable Watchdog in case it is not done in startup code */
-                              /* Enable clocks to peripherals (PORT modules) */
-  PCC-> PCCn[PCC_PORTC_INDEX] = PCC_PCCn_CGC_MASK; /* Enable clock to PORT C */
-  PCC-> PCCn[PCC_PORTD_INDEX] = PCC_PCCn_CGC_MASK; /* Enable clock to PORT D */
+  WDOG_disable();             /* DisaLED_BLUEe Watchdog in case it is not done in startup code */
+                              /* EnaLED_BLUEe clocks to peripherals (PORT modules) */
+  PCC-> PCCn[PCC_PORTC_INDEX] = PCC_PCCn_CGC_MASK; /* EnaLED_BLUEe clock to PORT C */
+  PCC-> PCCn[PCC_PORTD_INDEX] = PCC_PCCn_CGC_MASK; /* EnaLED_BLUEe clock to PORT D */
                                /* Configure port C12 as GPIO input (BTN 0 [SW2] on EVB) */
-  PTC->PDDR &= ~(1<<PTC12);    /* Port C12: Data Direction= input (default) */
-  PORTC->PCR[12] = 0x00000110; /* Port C12: MUX = GPIO, input filter enabled */
+  GPIOC->PDDR &= ~(1<<BUTTON1);    /* Port C12: Data Direction= input (default) */
+  PORTC->PCR[BUTTON1] = (eAF_pinGPIO<<PCR_MUX) | (1<<PCR_PFE); /* Port C12: MUX = GPIO, input filter enaLED_BLUEed */
+  	  	  	  	  	  	  	   /* Configure port C13 as GPIO input (BTN 1 [SW3] on EVB) */
+  GPIOC->PDDR &= ~(1<<BUTTON2);    /* Port C13: Data Direction= input (default) */
+  PORTC->PCR[BUTTON2] = (eAF_pinGPIO<<PCR_MUX) | (1<<PCR_PFE); /* Port C13: MUX = GPIO, input filter enaLED_BLUEed */
                                /* Configure port D0 as GPIO output (LED on EVB) */
-  PTD->PDDR |= 1<<PTD0;        /* Port D0: Data Direction= output */
-  PORTD->PCR[0] = 0x00000100;  /* Port D0: MUX = GPIO */
+
+
+  GPIOD->PDDR |= 1<<LED_BLUE;        /* Port D0: Data Direction= output */
+  PORTD->PCR[LED_BLUE] = (eAF_pinGPIO<<PCR_MUX);  /* Port D0: MUX = GPIO */
+
+  GPIOD->PDDR |= 1<<LED_RED;		   /* Port D15: Data Direction= output */
+  PORTD->PCR[LED_RED] = (eAF_pinGPIO<<PCR_MUX);
+
+  GPIOD->PDDR |= 1<<LED_GREEN;		   /* Port D15: Data Direction= output */
+  PORTD->PCR[LED_GREEN] = (eAF_pinGPIO<<PCR_MUX);
 
   for(;;) {
-    if (PTC->PDIR & (1<<PTC12)) {   /* If Pad Data Input = 1 (BTN0 [SW2] pushed) */
-      PTD-> PCOR |= 1<<PTD0;        /* Clear Output on port D0 (LED on) */
+    if (GPIOC->PDIR & (1<<BUTTON2)) {   /* If Pad Data Input = 1 (BTN0 [SW2] pushed) */
+    	counter++;       /* Clear Output on port D0 (LED on) */
     }
-    else {                          /* If BTN0 was not pushed */
-      PTD-> PSOR |= 1<<PTD0;        /* Set Output on port D0 (LED off) */
+    if(counter >15){
+       	if(i%3 == 0){
+       		counter=1;
+       	}
+       	if(i%3 == 1){
+       	    counter=6;
+       	}
+       	if(i%3 == 2){
+       	   counter=11;
+       	}
+       	i=counter%24;
     }
-    counter++;
+    if(counter < 5 && (GPIOC->PDIR & (1<<BUTTON1))){
+    	GPIOD->PCOR |= 1<<LED_BLUE;
+    }
+    if(counter >=5 && counter <10 && (GPIOC->PDIR & (1<<BUTTON1))){
+    	GPIOD->PCOR |= 1<<LED_RED;
+    }
+    if(counter >=10 && counter <=15 && (GPIOC->PDIR & (1<<BUTTON1))){
+    	GPIOD->PCOR |= 1<<LED_GREEN;
+    }
+    if(~(GPIOC->PDIR & (1<<BUTTON1))){
+    	GPIOD->PSOR |= (1<<LED_BLUE);
+    	GPIOD->PSOR |= (1<<LED_RED);
+    	GPIOD->PSOR |= (1<<LED_GREEN);
+    }
   }
 }
