@@ -1,7 +1,7 @@
 "./src/startup_code/startup_S32K144.o"
 "./src/hello.o"
 -T
-"C:/Users/Andrei/Desktop/prj/rinfacad/s32k144/simple_s32k144/linker_scripts/S32K1xx_flash.ld"
+"C:/Users/Cosmin/Desktop/ra-backbone/RA-embedded-backbone/simple/linker_scripts/S32K1xx_flash.ld"
 -Wl,-Map,"hello_s32k144.map"
 -Xlinker
 --gc-sections
