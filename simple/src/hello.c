@@ -9,8 +9,10 @@
 
 #include "S32K144_small.h"    /* include peripheral declarations S32K144 */
 
-#define PTD0  0         /* Port PTD0, bit 0: FRDM EVB output to blue LED */
-#define PTC12 12        /* Port PTC12, bit 12: FRDM EVB input from BTN0 [SW2] */
+#define BUTON_1 12        /* Port PTC12, bit 12: FRDM EVB input from BTN0 [SW2] */
+#define BUTON_2 13
+#define LED_BLUE 0
+#define LED_RED 15
 
 void WDOG_disable (void)
 {
@@ -42,18 +44,34 @@ int main(void)
   PCC-> PCCn[PCC_PORTC_INDEX] = PCC_PCCn_CGC_MASK; /* Enable clock to PORT C */
   PCC-> PCCn[PCC_PORTD_INDEX] = PCC_PCCn_CGC_MASK; /* Enable clock to PORT D */
                                /* Configure port C12 as GPIO input (BTN 0 [SW2] on EVB) */
-  PTC->PDDR &= ~(1<<PTC12);    /* Port C12: Data Direction= input (default) */
-  PORTC->PCR[12] = 0x00000110; /* Port C12: MUX = GPIO, input filter enabled */
+  GPIOC->PDDR &= ~(1<<BUTON_1);    /* Port C12: Data Direction= input (default) */
+  PORTC->PCR[BUTON_1] = (eAF_pinGPIO << PCR_MUX) | (1<<PCR_PFE); /* Port C12: MUX = GPIO, input filter enabled */
                                /* Configure port D0 as GPIO output (LED on EVB) */
-  PTD->PDDR |= 1<<PTD0;        /* Port D0: Data Direction= output */
-  PORTD->PCR[0] = 0x00000100;  /* Port D0: MUX = GPIO */
+  GPIOC->PDDR &= ~(1<<BUTON_2);
+  PORTC->PCR[BUTON_2] = (eAF_pinGPIO << PCR_MUX) | (1<<PCR_PFE);
+
+  GPIOD->PDDR |= 1<<LED_BLUE;        /* Port D0: Data Direction= output */
+  PORTD->PCR[LED_BLUE] = eAF_pinGPIO << PCR_MUX;  /* Port D0: MUX = GPIO */ //de facut acasa ca mai sus
+
+  GPIOD->PDDR |= 1<<LED_RED;
+  PORTD->PCR[LED_RED] = eAF_pinGPIO << PCR_MUX;
 
   for(;;) {
-    if (PTC->PDIR & (1<<PTC12)) {   /* If Pad Data Input = 1 (BTN0 [SW2] pushed) */
-      PTD-> PCOR |= 1<<PTD0;        /* Clear Output on port D0 (LED on) */
+    if (GPIOC->PDIR & (1<<BUTON_1)) {   /* If Pad Data Input = 1 (BTN0 [SW2] pushed) */
+
+    	GPIOD-> PCOR |= 1<<LED_RED;        /* Clear Output on port D0 (LED on) */
+
     }
     else {                          /* If BTN0 was not pushed */
-      PTD-> PSOR |= 1<<PTD0;        /* Set Output on port D0 (LED off) */
+      GPIOD-> PSOR |= 1<<LED_RED;        /* Set Output on port D0 (LED off) */
+
+    }
+    if(GPIOC->PDIR && (1<<BUTON_2))
+    {
+    	GPIOD-> PCOR |= 1<<LED_BLUE;
+    }
+    else{
+    	 GPIOD-> PSOR |= 1<<LED_BLUE;
     }
     counter++;
   }
