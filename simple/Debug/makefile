@@ -66,7 +66,7 @@ hello_s32k144.siz \
 all: warning-messages explicit-dependencies hello_s32k144.elf secondary-outputs
 
 # Tool invocations
-hello_s32k144.elf: $(OBJS) C:/Users/Andrei/Desktop/prj/rinfacad/s32k144/simple_s32k144/linker_scripts/S32K1xx_flash.ld $(USER_OBJS)
+hello_s32k144.elf: $(OBJS) C:/Users/MiGen/Desktop/RA-embedded-backbone/simple/linker_scripts/S32K1xx_flash.ld $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Executing target #3 $@'
 	@echo 'Invoking: Standard S32DS C Linker'
