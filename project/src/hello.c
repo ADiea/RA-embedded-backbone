@@ -10,10 +10,6 @@
 #include "S32K144_small.h"    /* include peripheral declarations S32K144 */
 #include "gpio.h"
 
-#define LED_BLUE	GPIO_Pin_0         /* Port PTD0, bit 0: FRDM EVB output to blue LED */
-#define LED_RED		GPIO_Pin_15
-#define LED_GREEN	GPIO_Pin_16
-
 #define BTN_0		GPIO_Pin_12        /* Port PTC12, bit 12: FRDM EVB input from BTN0 [SW2] */
 #define BTN_1		GPIO_Pin_13
 #define NUMBER_BUTTONS 2
@@ -22,8 +18,14 @@
 #define LED_OFF 1
 
 #define CPU_FREQ 48000000
-#define WHILE_INSTRUCTIONS 4
+#define WHILE_INSTRUCTIONS 30
 #define BUTTON_TEST_DELAY (CPU_FREQ / WHILE_INSTRUCTIONS)
+
+typedef enum{
+	LED_BLUE = GPIO_Pin_0,
+	LED_RED = GPIO_Pin_15,
+	LED_GREEN = GPIO_Pin_16,
+}eLED;
 
 typedef enum {
 	eBtn_NotPressed,
@@ -36,7 +38,28 @@ typedef enum{
 	eButtonRight = BTN_0,
 }eButton;
 
-//eButtonPress gButtonState[NUMBER_BUTTONS];
+eLED gWhichLED;
+
+void setLEDOn(eLED led)
+{
+	switch (led) {
+		case LED_BLUE:
+			setPinValue(GPIOD, LED_BLUE, LED_ON);
+			setPinValue(GPIOD, LED_RED, LED_OFF);
+			setPinValue(GPIOD, LED_GREEN, LED_OFF);
+			break;
+		case LED_RED:
+			setPinValue(GPIOD, LED_BLUE, LED_OFF);
+			setPinValue(GPIOD, LED_RED, LED_ON);
+			setPinValue(GPIOD, LED_GREEN, LED_OFF);
+			break;
+		case LED_GREEN:
+			setPinValue(GPIOD, LED_BLUE, LED_OFF);
+			setPinValue(GPIOD, LED_RED, LED_OFF);
+			setPinValue(GPIOD, LED_GREEN, LED_ON);
+			break;
+	}
+}
 
 eButtonPress isPressed(eButton btn)
 {
@@ -45,6 +68,10 @@ eButtonPress isPressed(eButton btn)
 
 	if(value)
 	{
+		if(eButtonRight == btn)
+		{
+			setLEDOn(gWhichLED);
+		}
 		while(delay < BUTTON_TEST_DELAY)
 		{
 			if(!getPinValue(GPIOC, btn))
@@ -67,7 +94,12 @@ void waitButtonRelease(eButton btn)
 	}
 }
 
-
+void resetLeds()
+{
+	  setPinValue(GPIOD, LED_BLUE, LED_OFF);
+	  setPinValue(GPIOD, LED_RED, LED_OFF);
+	  setPinValue(GPIOD, LED_GREEN, LED_OFF);
+}
 
 void WDOG_disable (void)
 {
@@ -92,10 +124,6 @@ void WDOG_disable (void)
 
 int main(void)
 {
-  //int counter = 0;
-  uint8_t whichLED = 0;
-  uint8_t LEDState[] = {0, 0, 0};
-
   WDOG_disable();             /* Disable Watchdog in case it is not done in startup code */
                               /* Enable clocks to peripherals (PORT modules) */
 
@@ -121,59 +149,50 @@ int main(void)
   setPinDirection(GPIOD, LED_GREEN, ePinDir_Output);
   setPinFunction(PORTD, LED_GREEN, eAF_pinGPIO);
 
+  resetLeds();
+
+  uint8_t isPersistent = 0;
+  gWhichLED = LED_BLUE;
+
   for(;;)
   {
 	if( eBtn_NotPressed != isPressed(eButtonLeft) )
 	{
 		waitButtonRelease(eButtonLeft);
-
-		whichLED = (whichLED + 1) % 3;
+		switch (gWhichLED) {
+			case LED_BLUE:
+				gWhichLED = LED_GREEN;
+				break;
+			case LED_GREEN:
+				gWhichLED = LED_RED;
+				break;
+			case LED_RED:
+				gWhichLED = LED_BLUE;
+				break;
+			default:
+				break;
+		}
 	}
 
-	if( eBtn_LongPress == isPressed(eButtonRight) )
+	//open the LED if there was a longPress;
+	if(isPersistent)
 	{
-		LEDState[whichLED] = 1;
+		setLEDOn(gWhichLED);
 	}
-	else
+
+
+	eButtonPress btnPressed = isPressed(eButtonRight);
+	if( eBtn_LongPress == btnPressed )
 	{
-		LEDState[whichLED] = 0;
+		//making the LED stay on
+		isPersistent = 1;
+		waitButtonRelease(eButtonRight);
 	}
-
-	switch(whichLED)
+	else if(eBtn_Pressed == btnPressed)
 	{
-	case 0:
-		if(getPinValue(GPIOC, eButtonRight) || LEDState[whichLED])
-		{
-			setPinValue(GPIOD, LED_RED, LED_ON);
-		}
-		else
-		{
-			setPinValue(GPIOD, LED_RED, LED_OFF);
-		}
-	break;
-
-	case 1:
-		if(getPinValue(GPIOC, eButtonRight) || LEDState[whichLED])
-		{
-			setPinValue(GPIOD, LED_GREEN, LED_ON);
-		}
-		else
-		{
-			setPinValue(GPIOD, LED_GREEN, LED_OFF);
-		}
-	break;
-
-	case 2:
-		if(getPinValue(GPIOC, eButtonRight) || LEDState[whichLED])
-		{
-			setPinValue(GPIOD, LED_BLUE, LED_ON);
-		}
-		else
-		{
-			setPinValue(GPIOD, LED_BLUE, LED_OFF);
-		}
-	break;
+		//switching off the LED if it was on
+		isPersistent = 0;
 	}
-
+	resetLeds();
   }
 }
