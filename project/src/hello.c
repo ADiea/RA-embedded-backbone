@@ -22,8 +22,10 @@
 #define LED_OFF 1
 
 #define CPU_FREQ 48000000
-#define WHILE_INSTRUCTIONS 4
-#define BUTTON_TEST_DELAY (CPU_FREQ / WHILE_INSTRUCTIONS)
+#define WHILE_INSTRUCTIONS (4*15)
+#define BUTTON_TEST_DELAY (CPU_FREQ / WHILE_INSTRUCTIONS)	//Cu valorile initiale butonul trebuia tinut apasat tim de 5-10sec pentru a fi detectat un long press
+															//astfel am marit numarul de intructiuni asm din bucla while.
+															//daca punem nr de instructiuni while ca fiind 60, vom avea un timp de LongPress de aprox. 1sec
 
 typedef enum {
 	eBtn_NotPressed,
@@ -95,6 +97,7 @@ int main(void)
   //int counter = 0;
   uint8_t whichLED = 0;
   uint8_t LEDState[] = {0, 0, 0};
+  uint8_t actualLED =LED_BLUE;
 
   WDOG_disable();             /* Disable Watchdog in case it is not done in startup code */
                               /* Enable clocks to peripherals (PORT modules) */
@@ -114,20 +117,59 @@ int main(void)
 
   setPinDirection(GPIOD, LED_BLUE, ePinDir_Output);
   setPinFunction(PORTD, LED_BLUE, eAF_pinGPIO);
+  setPinValue(GPIOD, LED_BLUE, LED_OFF);
 
   setPinDirection(GPIOD, LED_RED, ePinDir_Output);
   setPinFunction(PORTD, LED_RED, eAF_pinGPIO);
+  setPinValue(GPIOD, LED_RED, LED_OFF);
 
   setPinDirection(GPIOD, LED_GREEN, ePinDir_Output);
   setPinFunction(PORTD, LED_GREEN, eAF_pinGPIO);
+  setPinValue(GPIOD, LED_GREEN, LED_OFF);
 
   for(;;)
   {
+/*	  if(eBtn_LongPress == isPressed(eButtonLeft)){
+		  setPinValue(GPIOD,LED_BLUE,LED_ON);
+		  uint32_t delay=0;
+		  while(delay < BUTTON_TEST_DELAY*4)
+		  {
+			  delay++;
+		  }
+		  setPinValue(GPIOD,LED_BLUE,LED_OFF);
+		  setPinValue(GPIOD,LED_RED,LED_ON);
+		  delay=0;
+		  while(delay < BUTTON_TEST_DELAY*4)
+		  {
+			  delay++;
+		  }
+		  setPinValue(GPIOD,LED_RED,LED_OFF);
+	  }
+
+	  if(eBtn_NotPressed == isPressed(eButtonLeft)){
+		  setPinValue(GPIOD,LED_GREEN,LED_OFF);
+	  }
+*/
 	if( eBtn_NotPressed != isPressed(eButtonLeft) )
 	{
 		waitButtonRelease(eButtonLeft);
 
+		setPinValue(GPIOD,actualLED,LED_OFF);
+		LEDState[actualLED]=0;
+
 		whichLED = (whichLED + 1) % 3;
+
+		switch(whichLED){
+		case 0:
+			 actualLED=LED_BLUE;
+			 break;
+		case 1:
+			 actualLED=LED_RED;
+			 break;
+		case 2:
+			 actualLED=LED_GREEN;
+			 break;
+	    }
 	}
 
 	if( eBtn_LongPress == isPressed(eButtonRight) )
@@ -139,41 +181,47 @@ int main(void)
 		LEDState[whichLED] = 0;
 	}
 
-	switch(whichLED)
-	{
-	case 0:
-		if(getPinValue(GPIOC, eButtonRight) || LEDState[whichLED])
+	if( eBtn_Pressed == isPressed(eButtonRight)){
+		setPinValue(GPIOD,LED_BLUE,LED_ON);
+		uint32_t delay=0;
+		while(delay < BUTTON_TEST_DELAY*4)
+		 {
+			 delay++;
+		 }
+		setPinValue(GPIOD,LED_RED,LED_ON);
+		delay=0;
+		while(delay < BUTTON_TEST_DELAY*4)
 		{
-			setPinValue(GPIOD, LED_RED, LED_ON);
+			delay++;
 		}
-		else
+		setPinValue(GPIOD,LED_BLUE,LED_OFF);
+		delay=0;
+		while(delay < BUTTON_TEST_DELAY*4)
 		{
-			setPinValue(GPIOD, LED_RED, LED_OFF);
+			delay++;
 		}
-	break;
-
-	case 1:
-		if(getPinValue(GPIOC, eButtonRight) || LEDState[whichLED])
+		setPinValue(GPIOD,LED_GREEN,LED_ON);
+		delay=0;
+		while(delay < BUTTON_TEST_DELAY*4)
 		{
-			setPinValue(GPIOD, LED_GREEN, LED_ON);
+			delay++;
 		}
-		else
+		setPinValue(GPIOD,LED_RED,LED_OFF);
+		delay=0;
+		while(delay < BUTTON_TEST_DELAY*4)
 		{
-			setPinValue(GPIOD, LED_GREEN, LED_OFF);
+			delay++;
 		}
-	break;
-
-	case 2:
-		if(getPinValue(GPIOC, eButtonRight) || LEDState[whichLED])
-		{
-			setPinValue(GPIOD, LED_BLUE, LED_ON);
-		}
-		else
-		{
-			setPinValue(GPIOD, LED_BLUE, LED_OFF);
-		}
-	break;
+		setPinValue(GPIOD,LED_GREEN,LED_OFF);
 	}
 
+	if(getPinValue(GPIOC, eButtonRight) || LEDState[whichLED])
+	{
+		setPinValue(GPIOD, actualLED, LED_ON);
+	}
+	else
+	{
+		setPinValue(GPIOD, actualLED, LED_OFF);
+	}
   }
 }
