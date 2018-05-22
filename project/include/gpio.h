@@ -200,7 +200,7 @@ void setPinFunction(PORT_Type* whichGPIO, uint8_t pinNumber, eAlternateFunc func
 
 void setPinPasiveFilter(PORT_Type* whichGPIO, uint8_t pinNumber, ePinPasFilter filter);
 
-void setPinValue(GPIO_Type* whichGPIO, uint8_t pinNumber, uint8_t value);
+void setPinValue(GPIO_Type* whichGPIO, uint8_t pinNumber, uint8_t val);
 
 uint8_t getPinValue(GPIO_Type* whichGPIO, uint8_t pinNumber);
 
