@@ -52,5 +52,5 @@ void setPinValue(GPIO_Type* whichGPIO, uint8_t pinNumber, uint8_t value)
 
 uint8_t getPinValue(GPIO_Type* whichGPIO, uint8_t pinNumber)
 {
-	return (whichGPIO->PDIR & (1<<pinNumber));
+	return (whichGPIO->PDIR & (1<<pinNumber))>>(pinNumber-1);
 }
