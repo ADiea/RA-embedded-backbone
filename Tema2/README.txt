@@ -1,0 +1,2 @@
+This is a simple S32DesignStudio project for S32K144 microcontroller. See description.txt.
+Original project location is in C:\NXP\S32DS_ARM_v2018.R1\eclipse\plugins\com.nxp.s32ds.arm.examples.descriptor_1.0.0.201801242132\Examples\S32K144\hello_s32k144

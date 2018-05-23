@@ -1,0 +1,11 @@
+"./src/startup_code/startup_S32K144.o"
+"./src/hello.o"
+-T
+"D:/RINF_PROJ/CURS1/RA-embedded-backbone/simple/Project_Settings/Linker_Files/S32K1xx_ram.ld"
+-Wl,-Map,"hello_s32k144.map"
+-Xlinker
+--gc-sections
+-mcpu=cortex-m4
+-mthumb
+-specs=ewl_c9x_noio.specs
+--sysroot="D:/S32/S32DS/arm_ewl2"
