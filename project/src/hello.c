@@ -18,8 +18,8 @@
 #define BTN_1					GPIO_Pin_13
 #define NUMBER_BUTTONS			2
 
-#define CPU_FREQ 				4800000
-#define WHILE_INSTRUCTIONS 		4
+#define CPU_FREQ 				48000000
+#define WHILE_INSTRUCTIONS 		120
 #define BUTTON_TEST_DELAY		(CPU_FREQ / WHILE_INSTRUCTIONS)
 
 #define LED_ON 					0
