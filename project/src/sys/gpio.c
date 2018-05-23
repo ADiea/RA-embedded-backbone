@@ -2,7 +2,7 @@
 
 void setPinDirection(GPIO_Type* whichGPIO, uint8_t pinNumber, ePinDirection dir){
 
-	//se poate reseta din prima si  eventual facut 1 dupa daca e nevoie -- varianta mai buna
+	//se poate reseta din prima si  eventual facut 1 dupa daca e nevoie -- varianta mai buna 
 	//facem cu if pentru clariatate
 	if( ePinDir_Input == dir){
 		whichGPIO->PDDR &= ~(1<<pinNumber);

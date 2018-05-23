@@ -2,7 +2,7 @@
  * hello.c              Copyright NXP 2016
  * Description:  Simple program to exercise GPIO
  * 2015 Mar 31 S Mihalik/ O Romero - initial version
- *
+ * 
  */
 
 /*Modified 09.05.2018 by ADiea for simplification of code base*/
