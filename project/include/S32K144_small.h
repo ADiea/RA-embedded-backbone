@@ -60,7 +60,7 @@ typedef struct {
 	uint8_t RESERVED_4[12];
 	uint32_t PDB0;
 	uint32_t LPIT;
-	uint32_t FTM0;
+	uint32_t PCC_FTM0;
 	uint32_t FTM1;
 	uint32_t FTM2;
 	uint32_t ADC0;

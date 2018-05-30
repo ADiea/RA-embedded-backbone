@@ -9,6 +9,7 @@
 
 #include "S32K144_small.h"    /* include peripheral declarations S32K144 */
 #include "gpio.h"
+#include "timer.h"
 
 #define BTN_0		GPIO_Pin_12        /* Port PTC12, bit 12: FRDM EVB input from BTN0 [SW2] */
 #define BTN_1		GPIO_Pin_13
@@ -42,6 +43,13 @@ typedef enum{
 	eButtonLeft = BTN_1,
 	eButtonRight = BTN_0,
 }eButton;
+
+typedef enum
+{
+	ePWMLED_BLUE = eFTM_CH2,
+	ePWMLED_RED = eFTM_CH0,
+	ePWMLED_GREEN = eFTM_CH1,
+}eLEDPWMChannels;
 
 uint32_t buttonDelay[NUMBER_BUTTONS];
 
@@ -126,6 +134,46 @@ void WDOG_disable (void)
 	  WDOG->TOVAL = (uint32_t )0xFFFF;
 }
 
+#define LEDPWN_CNTIN_VAL 0
+#define LEDPWN_MOD_VAL 255
+
+//Using flexible timer 0 for controlling RGB LED with PWM
+void timer0Init()
+{
+	//RCC enable timer0
+	PCC->PCC_FTM0 = PCC_PCCn_CGC_MASK;
+
+	 setPinFunction(PORTD, LED_BLUE, eAF_pinAF2);
+     setPinFunction(PORTD, LED_RED, eAF_pinAF2);
+	 setPinFunction(PORTD, LED_GREEN, eAF_pinAF2);
+
+	//configure timer 0
+	selectClockSource(FTM0, eCS_FTM_InClk);
+	selectPrescaleFactor(FTM0, ePF_DivBy128);
+
+	enablePWMOutput(FTM0, ePWMLED_BLUE, ePWM_enabled, LEDPWN_CNTIN_VAL, LEDPWN_MOD_VAL);
+	enablePWMOutput(FTM0, ePWMLED_RED, ePWM_enabled, LEDPWN_CNTIN_VAL, LEDPWN_MOD_VAL);
+	enablePWMOutput(FTM0, ePWMLED_GREEN, ePWM_enabled, LEDPWN_CNTIN_VAL, LEDPWN_MOD_VAL);
+
+	setPWMDUty(FTM0, ePWMLED_BLUE, 0);
+	setPWMDUty(FTM0, ePWMLED_RED, 127);
+	setPWMDUty(FTM0, ePWMLED_GREEN, 127);
+}
+
+void init_RGB_GPIO(void)
+{
+	  setPinDirection(GPIOD, LED_BLUE, ePinDir_Output);
+	  setPinFunction(PORTD, LED_BLUE, eAF_pinGPIO);
+	  //todo set led off
+
+	  setPinDirection(GPIOD, LED_RED, ePinDir_Output);
+	  setPinFunction(PORTD, LED_RED, eAF_pinGPIO);
+
+	  setPinDirection(GPIOD, LED_GREEN, ePinDir_Output);
+	  setPinFunction(PORTD, LED_GREEN, eAF_pinGPIO);
+
+}
+
 int main(void)
 {
   //int counter = 0;
@@ -137,9 +185,14 @@ int main(void)
   WDOG_disable();             /* Disable Watchdog in case it is not done in startup code */
                               /* Enable clocks to peripherals (PORT modules) */
 
+
+
   //Clock Configuration
   PCC->PORTC_CLK = PCC_PCCn_CGC_MASK;
   PCC->PORTD_CLK = PCC_PCCn_CGC_MASK;
+
+  timer0Init();
+  //init_RGB_GPIO();
 
   //GPIO Configuration
   setPinDirection(GPIOC, BTN_0, ePinDir_Input);
@@ -150,15 +203,7 @@ int main(void)
   setPinFunction(PORTC, BTN_1, eAF_pinGPIO);
   setPinPasiveFilter(PORTC, BTN_1, ePasFilter_On);
 
-  setPinDirection(GPIOD, LED_BLUE, ePinDir_Output);
-  setPinFunction(PORTD, LED_BLUE, eAF_pinGPIO);
-  //todo set led off
 
-  setPinDirection(GPIOD, LED_RED, ePinDir_Output);
-  setPinFunction(PORTD, LED_RED, eAF_pinGPIO);
-
-  setPinDirection(GPIOD, LED_GREEN, ePinDir_Output);
-  setPinFunction(PORTD, LED_GREEN, eAF_pinGPIO);
 
   for(;;)
   {

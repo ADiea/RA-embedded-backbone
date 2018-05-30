@@ -73,31 +73,34 @@ typedef struct {
 
 }FTM_Type, *FTM_MemMapPtr;
 
+#define TIMER_CH_SC(timer, channel) (&((timer)->C0SC) + (channel)*2*sizeof(uint32_t))
+#define TIMER_CH_V(timer, channel) (&((timer)->C0V) + (channel)*2*sizeof(uint32_t))
 
 /* FTM - Timer instance base addresses */
 /** Peripheral FTM0 base address **/
-#define FTM0_BASE				(0x4003_8000)
+#define FTM0_BASE				(0x40038000)
 /** Peripheral FTM0 base pointer **/
 #define FTM0					((FTM_Type *)FTM0_BASE)
 
 /** Peripheral FTM1 base address **/
-#define FTM1_BASE				(0x4003_9000)
+#define FTM1_BASE				(0x40039000)
 /** Peripheral FTM1 base pointer **/
 #define FTM1					((FTM_Type *)FTM1_BASE)
 
 /** Peripheral FTM2 base address **/
-#define FTM2_BASE				(0x4003_A000)
+#define FTM2_BASE				(0x4003A000)
 /** Peripheral FTM2 base pointer **/
 #define FTM2					((FTM_Type *)FTM2_BASE)
 
 /** Peripheral FTM3 base address **/
-#define FTM3_BASE				(0x4002_6000)
+#define FTM3_BASE				(0x40026000)
 /** Peripheral FTM3 base pointer **/
 #define FTM3					((FTM_Type *)FTM3_BASE)
 
 // -- MODE register --
 // define the position of WriteProtection Disable pin in MODE register
 #define MODE_WPDIS 2
+#define MODE_INIT 1
 
 // -- Status and Control register --
 // define the starting position of pins
@@ -110,6 +113,11 @@ typedef struct {
 #define SC_TOF    9
 #define SC_PWMENn 16
 #define SC_FLTPS  24
+
+#define CxSC_MSB 5
+#define CxSC_ELSA 2
+
+
 
 typedef enum {
 	eFTM_CH0 = 0,
@@ -161,6 +169,8 @@ void selectClockSource(FTM_Type* whichTimer, eClockSource clk);
 
 void selectPrescaleFactor(FTM_Type* whichTimer, ePrescaleFactor factor);
 
-void enablePWMOutput(FTM_Type* whichTimer, eFTMChannel whichChannel, ePWMoutput mode);
+void enablePWMOutput(FTM_Type* whichTimer, eFTMChannel whichChannel, ePWMoutput mode, uint32_t cntin, uint32_t mod);
+
+void setPWMDUty(FTM_Type* whichTimer, eFTMChannel whichChannel, uint32_t duty);
 
 #endif /* TIMER_H_ */
