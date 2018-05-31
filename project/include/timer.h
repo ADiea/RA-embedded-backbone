@@ -73,8 +73,8 @@ typedef struct {
 
 }FTM_Type, *FTM_MemMapPtr;
 
-#define TIMER_CH_SC(timer, channel) (&((timer)->C0SC) + (channel)*2*sizeof(uint32_t))
-#define TIMER_CH_V(timer, channel) (&((timer)->C0V) + (channel)*2*sizeof(uint32_t))
+#define TIMER_CH_SC(timer, channel) (&((timer)->C0SC) + (channel)*2)
+#define TIMER_CH_V(timer, channel) (&((timer)->C0V) + (channel)*2)
 
 /* FTM - Timer instance base addresses */
 /** Peripheral FTM0 base address **/

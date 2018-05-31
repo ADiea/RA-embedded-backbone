@@ -63,7 +63,9 @@ PWM inverted mode because led lights up on 0 level
 */
 
 void enablePWMOutput(FTM_Type* whichTimer, eFTMChannel whichChannel, ePWMoutput mode,
-		 uint32_t cntin, uint32_t mod) {
+		 uint32_t cntin, uint32_t mod)
+{
+	uint32_t *pChannelConfig = 0;
 	if(mode == ePWM_disabled) {
 		whichTimer->SC &= ~(1 << (SC_PWMENn + whichChannel));
 	}
@@ -71,10 +73,13 @@ void enablePWMOutput(FTM_Type* whichTimer, eFTMChannel whichChannel, ePWMoutput 
 		whichTimer->SC |= (1 << (SC_PWMENn + whichChannel));
 	}
 
+	whichTimer->CNT = 0;
 	whichTimer->CNTIN = cntin;
 	whichTimer->MOD = mod;
 
-	*TIMER_CH_SC(whichTimer, whichChannel) |= (1<<CxSC_MSB) | (1<<CxSC_ELSA);
+	pChannelConfig =TIMER_CH_SC(whichTimer, whichChannel);
+
+	*pChannelConfig |= (1<<CxSC_MSB) | (1<<CxSC_ELSA);
 
 	whichTimer->MODE |= 1<<MODE_INIT;
 
@@ -82,5 +87,6 @@ void enablePWMOutput(FTM_Type* whichTimer, eFTMChannel whichChannel, ePWMoutput 
 
 void setPWMDUty(FTM_Type* whichTimer, eFTMChannel whichChannel, uint32_t duty)
 {
-	*TIMER_CH_V(whichTimer, whichChannel)  = duty;
+	uint32_t *pChannelConfig = TIMER_CH_V(whichTimer, whichChannel);
+	*pChannelConfig  = duty;
 }
