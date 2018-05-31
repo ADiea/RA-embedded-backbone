@@ -66,6 +66,16 @@ void cpuDelayMs(uint32_t ms)
 	}
 }
 
+void PORTC_IRQHandler(void)
+{
+
+	//verify which pin was pressed
+
+	//set global variable OR directly take action
+
+
+}
+
 void turnLEDOn(eLED led)
 {
 	setPinValue(GPIOD, LED_BLUE, LED_OFF);
@@ -147,17 +157,18 @@ void timer0Init()
      setPinFunction(PORTD, LED_RED, eAF_pinAF2);
 	 setPinFunction(PORTD, LED_GREEN, eAF_pinAF2);
 
-	//configure timer 0
-	selectClockSource(FTM0, eCS_FTM_InClk);
-	selectPrescaleFactor(FTM0, ePF_DivBy128);
-
 	enablePWMOutput(FTM0, ePWMLED_BLUE, ePWM_enabled, LEDPWN_CNTIN_VAL, LEDPWN_MOD_VAL);
 	enablePWMOutput(FTM0, ePWMLED_RED, ePWM_enabled, LEDPWN_CNTIN_VAL, LEDPWN_MOD_VAL);
 	enablePWMOutput(FTM0, ePWMLED_GREEN, ePWM_enabled, LEDPWN_CNTIN_VAL, LEDPWN_MOD_VAL);
 
 	setPWMDUty(FTM0, ePWMLED_BLUE, 0);
-	setPWMDUty(FTM0, ePWMLED_RED, 127);
+	setPWMDUty(FTM0, ePWMLED_RED, 10);
 	setPWMDUty(FTM0, ePWMLED_GREEN, 127);
+
+	//configure timer 0
+	selectClockSource(FTM0, eCS_FTM_InClk);
+	selectPrescaleFactor(FTM0, ePF_DivBy128);
+
 }
 
 void init_RGB_GPIO(void)
@@ -193,6 +204,15 @@ int main(void)
 
   timer0Init();
   //init_RGB_GPIO();
+
+  uint32_t cnt;
+  uint32_t addr;
+  for(;;)
+  {
+	  cnt = FTM0->CNT;
+	  addr = &(FTM0->CNT);
+  }
+
 
   //GPIO Configuration
   setPinDirection(GPIOC, BTN_0, ePinDir_Input);
