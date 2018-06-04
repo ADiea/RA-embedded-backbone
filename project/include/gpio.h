@@ -143,8 +143,9 @@ typedef enum{
 	/*ISF flag ad Interrupt on either edge*/
 	IRQC_EE		= 11,
 	/*ISF flag ad Interrupt when logic 1*/
-	IRQC_L1		= 12
-
+	IRQC_L1		= 12,
+	/* mask for resetting IRQC bits */
+	IRQC_ALL    = 15
 }IRQ_Config;
 
 
@@ -186,6 +187,13 @@ typedef enum
 /*Pull Select */
 #define PCR_PS			 0
 
+/*Interrupt Configuration */
+#define PCR_IRQC        16
+
+/*Interrupt Status Flag */
+#define PCR_ISF         24
+
+#define PCR_ISF_MASK    (1<<PCR_ISF)
 typedef enum
 {
 	ePasFilter_Off,
@@ -203,5 +211,7 @@ void setPinPasiveFilter(PORT_Type* whichGPIO, uint8_t pinNumber, ePinPasFilter f
 void setPinValue(GPIO_Type* whichGPIO, uint8_t pinNumber, uint8_t value);
 
 uint32_t getPinValue(GPIO_Type* whichGPIO, uint8_t pinNumber);
+
+void configInterrupt(PORT_Type* whichPORT, uint8_t pinNumber, IRQ_Config config);
 
 #endif /* GPIO_H_ */

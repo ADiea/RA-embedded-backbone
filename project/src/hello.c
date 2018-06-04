@@ -10,10 +10,14 @@
 #include "S32K144_small.h"    /* include peripheral declarations S32K144 */
 #include "gpio.h"
 #include "timer.h"
+#include "interrupt.h"
 
 #define BTN_0		GPIO_Pin_12        /* Port PTC12, bit 12: FRDM EVB input from BTN0 [SW2] */
 #define BTN_1		GPIO_Pin_13
 #define NUMBER_BUTTONS 2
+#define NUMBER_PINS    18
+
+uint32_t ButtonState[2];
 
 typedef enum{
 	LED_ON,
@@ -70,9 +74,23 @@ void PORTC_IRQHandler(void)
 {
 
 	//verify which pin was pressed
-
+	//clear interrupt status flag of the corresponding pin
 	//set global variable OR directly take action
 
+	if(PORTC->PCR[eButtonRight] & PCR_ISF_MASK)
+	{
+		// if pin 12 generated the interrupt, reset ISF from the corresponding PCRn register by writing 1
+		// doesn't matter if we write 0 to other bits, because they are write 1 to clear (w1c)
+		PORTC->ISFR = (1 << eButtonRight);
+		ButtonState[0] = 1;
+	}
+
+	if(PORTC->PCR[eButtonLeft] & PCR_ISF_MASK)
+	{
+		// if pin 13 generated the interrupt, reset ISF from the corresponding PCRn register by writing 1
+		PORTC->ISFR = (1 << eButtonLeft);
+		ButtonState[1] = 1;
+	}
 
 }
 
@@ -153,17 +171,17 @@ void timer0Init()
 	//RCC enable timer0
 	PCC->PCC_FTM0 = PCC_PCCn_CGC_MASK;
 
-	 setPinFunction(PORTD, LED_BLUE, eAF_pinAF2);
-     setPinFunction(PORTD, LED_RED, eAF_pinAF2);
-	 setPinFunction(PORTD, LED_GREEN, eAF_pinAF2);
+	setPinFunction(PORTD, LED_BLUE, eAF_pinAF2);
+	setPinFunction(PORTD, LED_RED, eAF_pinAF2);
+	setPinFunction(PORTD, LED_GREEN, eAF_pinAF2);
 
 	enablePWMOutput(FTM0, ePWMLED_BLUE, ePWM_enabled, LEDPWN_CNTIN_VAL, LEDPWN_MOD_VAL);
 	enablePWMOutput(FTM0, ePWMLED_RED, ePWM_enabled, LEDPWN_CNTIN_VAL, LEDPWN_MOD_VAL);
 	enablePWMOutput(FTM0, ePWMLED_GREEN, ePWM_enabled, LEDPWN_CNTIN_VAL, LEDPWN_MOD_VAL);
 
 	setPWMDUty(FTM0, ePWMLED_BLUE, 0);
-	setPWMDUty(FTM0, ePWMLED_RED, 10);
-	setPWMDUty(FTM0, ePWMLED_GREEN, 127);
+	setPWMDUty(FTM0, ePWMLED_RED, 0);
+	setPWMDUty(FTM0, ePWMLED_GREEN, 0);
 
 	//configure timer 0
 	selectClockSource(FTM0, eCS_FTM_InClk);
@@ -187,11 +205,10 @@ void init_RGB_GPIO(void)
 
 int main(void)
 {
-  //int counter = 0;
-  eLED whichLED = 0;
-  uint8_t currentLEDState = 0;
-  eButtonPress leftButPressState;
-  eButtonPress rightButPressState;
+  eLED whichLED = LED_RED;
+  uint8_t factorR = 50, factorG = 50, factorB = 50;
+  ButtonState[0] = 0;
+  ButtonState[1] = 0;
 
   WDOG_disable();             /* Disable Watchdog in case it is not done in startup code */
                               /* Enable clocks to peripherals (PORT modules) */
@@ -205,14 +222,6 @@ int main(void)
   timer0Init();
   //init_RGB_GPIO();
 
-  uint32_t cnt;
-  uint32_t addr;
-  for(;;)
-  {
-	  cnt = FTM0->CNT;
-	  addr = &(FTM0->CNT);
-  }
-
 
   //GPIO Configuration
   setPinDirection(GPIOC, BTN_0, ePinDir_Input);
@@ -223,62 +232,55 @@ int main(void)
   setPinFunction(PORTC, BTN_1, eAF_pinGPIO);
   setPinPasiveFilter(PORTC, BTN_1, ePasFilter_On);
 
+  //Enable Interrupt on PORTC
+  enableInterrupt(PORTC_IRQ);
+
+  //Interrupt Configuration
+  configInterrupt(PORTC, BTN_0, IRQC_RE);
+  configInterrupt(PORTC, BTN_1, IRQC_RE);
+
 
 
   for(;;)
   {
-	leftButPressState = isPressed(eButtonLeft);
-	rightButPressState = isPressed(eButtonRight);
-
-	if( eBtn_Pressed == leftButPressState)
+	// if left button pressed, change led color
+	if(ButtonState[1] == 1)
 	{
-		//change the led color to the next color
 		switch(whichLED)
 		{
-		case LED_BLUE:
-			whichLED = LED_RED;
-			break;
 		case LED_RED:
+			whichLED = LED_BLUE;
+			break;
+		case LED_BLUE:
 			whichLED = LED_GREEN;
 			break;
 		default:
-			whichLED = LED_BLUE;
+			whichLED = LED_RED;
 		}
-
-		//blink the led once to signal color change
-		turnLEDOn(whichLED);
-		cpuDelayMs(100);
-		//led will be turned off if the other button is not pressed,
-		//no need to turn it off here
-
-		waitButtonRelease(eButtonLeft);
+		// reset button state
+		ButtonState[1] = 0;
 	}
-
-	if( eBtn_LongPress == rightButPressState )
+	// if right button pressed, increment factorX corresponding to color X given by whichLED
+	if(ButtonState[0] == 1)
 	{
-		currentLEDState = 1;
-
-		//blink the led continuously to signal that the button has been long pressed
-		//and can be released (visual feedback for user)
-		turnLEDOff(whichLED);
-		cpuDelayMs(200); //keep it off for 0.2s
-
-		turnLEDOn(whichLED);
-		cpuDelayMs(300); //keep it on for 0.3s
-	}
-	else if( eBtn_Pressed == rightButPressState )
-	{
-		currentLEDState = 0;
-		turnLEDOn(whichLED);
-	}
-	else
-	{
-		if(!currentLEDState)
+		switch(whichLED)
 		{
-			setPinValue(GPIOD, LED_BLUE, LED_OFF);
-			setPinValue(GPIOD, LED_RED, LED_OFF);
-			setPinValue(GPIOD, LED_GREEN, LED_OFF);
+		case LED_RED:
+			factorR += 30;
+			break;
+		case LED_BLUE:
+			factorB += 30;
+			break;
+		case LED_GREEN:
+			factorG += 30;
+			break;
 		}
+		// reset button state
+		ButtonState[0] = 0;
 	}
+	setPWMDUty(FTM0, ePWMLED_BLUE, factorB);
+	setPWMDUty(FTM0, ePWMLED_RED, factorR);
+	setPWMDUty(FTM0, ePWMLED_GREEN, factorG);
+
   }
 }

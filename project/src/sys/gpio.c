@@ -54,3 +54,9 @@ uint32_t getPinValue(GPIO_Type* whichGPIO, uint8_t pinNumber)
 {
 	return (whichGPIO->PDIR & (1<<pinNumber));
 }
+
+void configInterrupt(PORT_Type* whichPORT, uint8_t pinNumber, IRQ_Config config)
+{
+	whichPORT->PCR[pinNumber] &= ~(IRQC_ALL << PCR_IRQC);
+	whichPORT->PCR[pinNumber] |= (config << PCR_IRQC);
+}
