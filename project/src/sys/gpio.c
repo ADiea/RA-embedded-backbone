@@ -54,3 +54,43 @@ uint32_t getPinValue(GPIO_Type* whichGPIO, uint8_t pinNumber)
 {
 	return (whichGPIO->PDIR & (1<<pinNumber));
 }
+
+
+/* GPIO Interrupt API Definition */
+void enableSingleInterrupt(PORT_Type* whichGPIO, uint8_t pinNumber, eIRQConfig config ){
+
+	whichGPIO->PCR[pinNumber] &= ~(eIRQC_ALL << IRQC);
+	whichGPIO->PCR[pinNumber] |= (config << IRQC);
+}
+
+uint32_t getPinInterruptStatusFlag(PORT_Type* whichGPIO, uint8_t pinNumber){
+	return( whichGPIO->ISFR & (1<<pinNumber) );
+}
+
+void clearPinInterruptStatusFlag(PORT_Type* whichGPIO, uint8_t pinNumber){
+	whichGPIO->ISFR |= (1<<pinNumber);
+}
+
+/*The IRQ_ID for a specific peripheral can be found in S32K1x_INT_MAP_ARM attached
+ * to the Reference Manual*/
+void enableNVICInterrupt( ePeriphIRQNumber IRQ_ID ){
+
+	/*NVIC register number for IRQ_ID*/
+	uint8_t IRQ_reg =  IRQ_ID / 32;
+	/*NVIC register bit location*/
+	uint8_t IRQ_bit = IRQ_ID % 32;
+
+	S32_NVIC->IP[15] |= ~(15 << 12);
+
+	S32_NVIC->ISER[IRQ_reg] |= (1 << IRQ_bit);
+}
+
+void clearNVICInterrupt( ePeriphIRQNumber IRQ_ID ){
+
+	/*NVIC register number for IRQ_ID*/
+	uint8_t IRQ_reg =  IRQ_ID / 32;
+	/*NVIC register bit location*/
+	uint8_t IRQ_bit = IRQ_ID % 32;
+
+	S32_NVIC->ICER[IRQ_ID] |= (1 << IRQ_bit);
+}

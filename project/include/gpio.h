@@ -59,7 +59,7 @@ typedef struct {
  * 18 Pins on PORTB
  * 18 Pins on PORTC
  * 18 Pins on PORTD
- * 18 Pins on PORTE
+ * 17 Pins on PORTE
  */
 
 #define GPIO_Pin_0                 0 /*!< Pin 0 selected */
@@ -129,24 +129,103 @@ typedef struct {
 /*Interrupt Configuration*/
 typedef enum{
 	/*ISF flag and DMA request on rising edge */
-	IRQC_DMA_RE = 1,
+	eIRQC_DMA_RE = 1,
 	/*ISF flag and DMA request on falling edge */
-	IRQC_DMA_FE	= 2,
+	eIRQC_DMA_FE	= 2,
 	/*ISF flag and DMA request on either edge */
-	IRQC_DMA_EE = 3,
+	eIRQC_DMA_EE = 3,
 	/*ISF flag ad Interrupt when logic 0*/
-	IRQC_L0		= 8,
+	eIRQC_L0		= 8,
 	/*ISF flag ad Interrupt on rising edge*/
-	IRQC_RE		= 9,
+	eIRQC_RE		= 9,
 	/*ISF flag ad Interrupt on falling edge*/
-	IRQC_FE		= 10,
+	eIRQC_FE		= 10,
 	/*ISF flag ad Interrupt on either edge*/
-	IRQC_EE		= 11,
+	eIRQC_EE		= 11,
 	/*ISF flag ad Interrupt when logic 1*/
-	IRQC_L1		= 12
+	eIRQC_L1		= 12,
+	/*All Interrupt Configurations*/
+	eIRQC_ALL 	= 15
+}eIRQConfig;
 
-}IRQ_Config;
+#define IRQC 	16
+#define ISF		24
 
+
+/** S32_NVIC - Size of Registers Arrays */
+#define S32_NVIC_ISER_COUNT                      4u
+#define S32_NVIC_ICER_COUNT                      4u
+#define S32_NVIC_ISPR_COUNT                      4u
+#define S32_NVIC_ICPR_COUNT                      4u
+#define S32_NVIC_IABR_COUNT                      4u
+#define S32_NVIC_IP_COUNT                        123u
+
+/** S32_NVIC - Register Layout Typedef */
+typedef struct {
+		uint32_t ISER[S32_NVIC_ISER_COUNT];         /**< Interrupt Set Enable Register n, array offset: 0x0, array step: 0x4 */
+		uint8_t RESERVED_0[112];
+		uint32_t ICER[S32_NVIC_ICER_COUNT];         /**< Interrupt Clear Enable Register n, array offset: 0x80, array step: 0x4 */
+		uint8_t RESERVED_1[112];
+		uint32_t ISPR[S32_NVIC_ISPR_COUNT];         /**< Interrupt Set Pending Register n, array offset: 0x100, array step: 0x4 */
+		uint8_t RESERVED_2[112];
+		uint32_t ICPR[S32_NVIC_ICPR_COUNT];         /**< Interrupt Clear Pending Register n, array offset: 0x180, array step: 0x4 */
+		uint8_t RESERVED_3[112];
+		uint32_t IABR[S32_NVIC_IABR_COUNT];         /**< Interrupt Active bit Register n, array offset: 0x200, array step: 0x4 */
+		uint8_t RESERVED_4[240];
+		uint8_t IP[S32_NVIC_IP_COUNT];              /**< Interrupt Priority Register n, array offset: 0x300, array step: 0x1 */
+		uint8_t RESERVED_5[2693];
+		uint32_t STIR;                              /**< Software Trigger Interrupt Register, offset: 0xE00 */
+} S32_NVIC_Type, *S32_NVIC_MemMapPtr;
+
+ /** Number of instances of the S32_NVIC module. */
+#define S32_NVIC_INSTANCE_COUNT                  (1u)
+
+/*NCIV Register map*/
+/*    	0xE000E000 - 0xE000E00F. Interrupt Type Register
+
+		0xE000E010 - 0xE000E0FF. System Timer
+
+    	0xE000E100 - 0xE000ECFF. NVIC
+
+    	0xE000ED00 - 0xE000ED8F. System Control Block, including:
+
+        	CPUID
+
+        	System control, configuration, and status
+
+        	Fault reporting
+
+    	0xE000EF00 - 0xE000EF0F. Software Trigger Exception Register
+
+    	0xE000EFD0 - 0xE000EFFF. ID space.*/
+
+/* S32_NVIC - Peripheral instance base addresses */
+/** Peripheral S32_NVIC base address */
+#define S32_NVIC_BASE                            (0xE000E100u)
+/** Peripheral S32_NVIC base pointer */
+#define S32_NVIC                                 ((S32_NVIC_Type *)S32_NVIC_BASE)
+/** Array initializer of S32_NVIC peripheral base addresses */
+#define S32_NVIC_BASE_ADDRS                      { S32_NVIC_BASE }
+
+/*NVIC Regs and Bits for PORTC*/
+#define NVIC_PORTC_REGS							 1
+/*Interrupt Set-enable bit*/
+#define NVIC_PORTC_ISER							29
+/*Intrerrupt Clear-enable bit*/
+#define NVIC_PORTC_ICER							29
+/*Interrupt Set-pending bit*/
+#define NVIC_PORTC_ISPR							29
+/*Interrupt Clear-pending bit*/
+#define NVIC_PORTC_ICPR							29
+/*Interrupt Active Bit*/
+#define NVIC_PORTC_IABR							29
+
+/*Interrupt Priority Register 4 bits*/
+#define NVIC_PORTC_IPR						12
+
+typedef enum{
+	ePORTC_IRQ_Nr = 61
+}ePeriphIRQNumber;
 
 
 /*Pin Configuration Mux */
@@ -192,7 +271,7 @@ typedef enum
 	ePasFilter_On,
 }ePinPasFilter;
 
-/**  API definition */
+/*  Standard GPIO API Definition */
 
 void setPinDirection(GPIO_Type* whichGPIO, uint8_t pinNumber, ePinDirection dir);
 
@@ -203,5 +282,19 @@ void setPinPasiveFilter(PORT_Type* whichGPIO, uint8_t pinNumber, ePinPasFilter f
 void setPinValue(GPIO_Type* whichGPIO, uint8_t pinNumber, uint8_t value);
 
 uint32_t getPinValue(GPIO_Type* whichGPIO, uint8_t pinNumber);
+
+
+/* GPIO Interrupt API Definition */
+
+void enableSingleInterrupt(PORT_Type* whichGPIO, uint8_t pinNumber, eIRQConfig config );
+
+uint32_t getPinInterruptStatusFlag(PORT_Type* whichGPIO, uint8_t pinNumber);
+
+void clearPinInterruptStatusFlag(PORT_Type* whichGPIO, uint8_t pinNumber);
+
+void enableNVICInterrupt( ePeriphIRQNumber IRQ_NR);
+
+void clearNVICInterrupt( ePeriphIRQNumber IRQ_NR);
+
 
 #endif /* GPIO_H_ */

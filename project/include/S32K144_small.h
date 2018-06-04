@@ -12,8 +12,10 @@
 #define FEATURE_WDOG_CLK_FROM_LPO                       (0x1UL)
 
 //we are on a 32bit arch so unsigned int should be a uint32
-typedef unsigned int uint32_t;
-typedef unsigned char uint8_t;
+typedef unsigned int 			uint32_t;
+typedef unsigned short int		uint16_t;
+typedef unsigned char 			uint8_t;
+
 
 //From S32K144.h
 
@@ -42,63 +44,63 @@ typedef struct {
 
 typedef struct {
 	uint8_t RESERVED_0[128];
-	uint32_t FTFC;
-	uint32_t DMAMUX;
+	uint32_t PCC_FTFC;
+	uint32_t PCC_DMAMUX;
 	uint8_t RESERVED_1[8];
-	uint32_t FlexCAN0;
-	uint32_t FlexCAN1;
-	uint32_t FTM3;
-	uint32_t ADC1;
+	uint32_t PCC_FlexCAN0;
+	uint32_t PCC_FlexCAN1;
+	uint32_t PCC_FTM3;
+	uint32_t PCC_ADC1;
 	uint8_t RESERVED_2[12];
-	uint32_t FlexCAN2;
-	uint32_t LPSPI0;
-	uint32_t LPSPI1;
-	uint32_t LPSPI2;
+	uint32_t PCC_FlexCAN2;
+	uint32_t PCC_LPSPI0;
+	uint32_t PCC_LPSPI1;
+	uint32_t PCC_LPSPI2;
 	uint8_t RESERVED_3[8];
-	uint32_t PDB1;
-	uint32_t CRC;
+	uint32_t PCC_PDB1;
+	uint32_t PCC_CRC;
 	uint8_t RESERVED_4[12];
-	uint32_t PDB0;
-	uint32_t LPIT;
+	uint32_t PCC_PDB0;
+	uint32_t PCC_LPIT;
 	uint32_t PCC_FTM0;
-	uint32_t FTM1;
-	uint32_t FTM2;
-	uint32_t ADC0;
+	uint32_t PCC_FTM1;
+	uint32_t PCC_FTM2;
+	uint32_t PCC_ADC0;
 	uint8_t RESERVED_5[4];
-	uint32_t RTC;
+	uint32_t PCC_RTC;
 	uint8_t RESERVED_6[8];
-	uint32_t LPTMR0;
+	uint32_t PCC_LPTMR0;
 	uint8_t RESERVED_7[32];
-	uint32_t PORTA_CLK;
-	uint32_t PORTB_CLK;
-	uint32_t PORTC_CLK;
-	uint32_t PORTD_CLK;
-	uint32_t PORTE_CLK;
+	uint32_t PCC_PORTA;
+	uint32_t PCC_PORTB;
+	uint32_t PCC_PORTC;
+	uint32_t PCC_PORTD;
+	uint32_t PCC_PORTE;
 	uint8_t RESERVED_8[24];
-	uint32_t SAI0;
-	uint32_t SAI1;
+	uint32_t PCC_SAI0;
+	uint32_t PCC_SAI1;
 	uint8_t RESERVED_9[16];
-	uint32_t FlexIO;
+	uint32_t PCC_FlexIO;
 	uint8_t RESERVED_10[24];
-	uint32_t EWM;
+	uint32_t PCC_EWM;
 	uint8_t RESERVED_11[16];
-	uint32_t LPI2C0;
-	uint32_t LPI2C1;
+	uint32_t PCC_LPI2C0;
+	uint32_t PCC_LPI2C1;
 	uint8_t RESERVED_12[8];
-	uint32_t LPUART0;
-	uint32_t LPUART1;
-	uint32_t LPUART2;
+	uint32_t PCC_LPUART0;
+	uint32_t PCC_LPUART1;
+	uint32_t PCC_LPUART2;
 	uint8_t RESERVED_13[4];
-	uint32_t FTM4;
-	uint32_t FTM5;
-	uint32_t FTM6;
-	uint32_t FTM7;
+	uint32_t PCC_FTM4;
+	uint32_t PCC_FTM5;
+	uint32_t PCC_FTM6;
+	uint32_t PCC_FTM7;
 	uint8_t RESERVED_14[4];
-	uint32_t CMP0;
+	uint32_t PCC_CMP0;
 	uint8_t RESERVED_15[8];
-	uint32_t QSPI;
+	uint32_t PCC_QSPI;
 	uint8_t RESERVED_16[8];
-	uint32_t ENET;
+	uint32_t PCC_ENET;
 
 } PCC_Type, *PCC_MemMapPtr;
 
