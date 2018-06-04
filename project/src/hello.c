@@ -10,39 +10,22 @@
 #include "S32K144_small.h"    /* include peripheral declarations S32K144 */
 #include "gpio.h"
 #include "timer.h"
+#include "button.h"
+#include "interrupts.h"
 
-#define BTN_0		GPIO_Pin_12        /* Port PTC12, bit 12: FRDM EVB input from BTN0 [SW2] */
-#define BTN_1		GPIO_Pin_13
-#define NUMBER_BUTTONS 2
 
 typedef enum{
 	LED_ON,
 	LED_OFF
 }eLedState;
 
-#define LED_OFF 1
-
 #define CPU_FREQ 48000000
-#define WHILE_INSTRUCTIONS (4*90)
-#define BUTTON_TEST_DELAY (CPU_FREQ / WHILE_INSTRUCTIONS)
-
-typedef enum {
-	eBtn_NotPressed,
-	eBtn_Pressed,
-	eBtn_Released,
-	eBtn_LongPress,
-}eButtonPress;
 
 typedef enum{
 	LED_BLUE = GPIO_Pin_0,
 	LED_RED = GPIO_Pin_15,
 	LED_GREEN = GPIO_Pin_16,
 }eLED;
-
-typedef enum{
-	eButtonLeft = BTN_1,
-	eButtonRight = BTN_0,
-}eButton;
 
 typedef enum
 {
@@ -51,7 +34,6 @@ typedef enum
 	ePWMLED_GREEN = eFTM_CH1,
 }eLEDPWMChannels;
 
-uint32_t buttonDelay[NUMBER_BUTTONS];
 
 //experimentally determined a calibration factor, it is not accurate
 #define EXPERIMENTAL_CALIB 8
@@ -64,16 +46,6 @@ void cpuDelayMs(uint32_t ms)
 		counter = CPU_FREQ / EXPERIMENTAL_CALIB / 1000;
 		while(counter--);
 	}
-}
-
-void PORTC_IRQHandler(void)
-{
-
-	//verify which pin was pressed
-
-	//set global variable OR directly take action
-
-
 }
 
 void turnLEDOn(eLED led)
@@ -89,39 +61,6 @@ void turnLEDOff(eLED led)
 {
 	setPinValue(GPIOD, led, LED_OFF);
 }
-
-eButtonPress isPressed(eButton btn)
-{
-	if(getPinValue(GPIOC, btn)) //button is pressed
-	{
-		if(buttonDelay[btn] < BUTTON_TEST_DELAY)
-		{
-			buttonDelay[btn]++;
-			return eBtn_Pressed;
-		}
-		else
-		{
-			return eBtn_LongPress;
-		}
-	}
-	else if(buttonDelay[btn] > 0) //button is not pressed check if it was pressed last time
-	{
-		buttonDelay[btn] = 0;
-		return eBtn_Released;
-	}
-
-	return eBtn_NotPressed;
-}
-
-void waitButtonRelease(eButton btn)
-{
-	while(getPinValue(GPIOC, btn))
-	{
-		;
-	}
-}
-
-
 
 void WDOG_disable (void)
 {
@@ -168,7 +107,6 @@ void timer0Init()
 	//configure timer 0
 	selectClockSource(FTM0, eCS_FTM_InClk);
 	selectPrescaleFactor(FTM0, ePF_DivBy128);
-
 }
 
 void init_RGB_GPIO(void)
@@ -196,8 +134,6 @@ int main(void)
   WDOG_disable();             /* Disable Watchdog in case it is not done in startup code */
                               /* Enable clocks to peripherals (PORT modules) */
 
-
-
   //Clock Configuration
   PCC->PORTC_CLK = PCC_PCCn_CGC_MASK;
   PCC->PORTD_CLK = PCC_PCCn_CGC_MASK;
@@ -213,7 +149,6 @@ int main(void)
 	  addr = &(FTM0->CNT);
   }
 
-
   //GPIO Configuration
   setPinDirection(GPIOC, BTN_0, ePinDir_Input);
   setPinFunction(PORTC, BTN_0, eAF_pinGPIO);
@@ -222,8 +157,6 @@ int main(void)
   setPinDirection(GPIOC, BTN_1, ePinDir_Input);
   setPinFunction(PORTC, BTN_1, eAF_pinGPIO);
   setPinPasiveFilter(PORTC, BTN_1, ePasFilter_On);
-
-
 
   for(;;)
   {
@@ -254,19 +187,7 @@ int main(void)
 		waitButtonRelease(eButtonLeft);
 	}
 
-	if( eBtn_LongPress == rightButPressState )
-	{
-		currentLEDState = 1;
-
-		//blink the led continuously to signal that the button has been long pressed
-		//and can be released (visual feedback for user)
-		turnLEDOff(whichLED);
-		cpuDelayMs(200); //keep it off for 0.2s
-
-		turnLEDOn(whichLED);
-		cpuDelayMs(300); //keep it on for 0.3s
-	}
-	else if( eBtn_Pressed == rightButPressState )
+	if( eBtn_Pressed == rightButPressState )
 	{
 		currentLEDState = 0;
 		turnLEDOn(whichLED);
