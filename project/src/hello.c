@@ -1,48 +1,30 @@
-/*
- * hello.c              Copyright NXP 2016
- * Description:  Simple program to exercise GPIO
- * 2015 Mar 31 S Mihalik/ O Romero - initial version
- *
- */
 
 /*Modified 09.05.2018 by ADiea for simplification of code base*/
 
 #include "S32K144_small.h"    /* include peripheral declarations S32K144 */
 #include "gpio.h"
 #include "timer.h"
-
-#define BTN_0		GPIO_Pin_12        /* Port PTC12, bit 12: FRDM EVB input from BTN0 [SW2] */
-#define BTN_1		GPIO_Pin_13
-#define NUMBER_BUTTONS 2
+#include "button.h"
 
 typedef enum{
 	LED_ON,
 	LED_OFF
 }eLedState;
 
-#define LED_OFF 1
+//#define LED_OFF 1
 
 #define CPU_FREQ 48000000
 #define WHILE_INSTRUCTIONS (4*90)
 #define BUTTON_TEST_DELAY (CPU_FREQ / WHILE_INSTRUCTIONS)
 
-typedef enum {
-	eBtn_NotPressed,
-	eBtn_Pressed,
-	eBtn_Released,
-	eBtn_LongPress,
-}eButtonPress;
+#define LEDPWN_CNTIN_VAL 0
+#define LEDPWN_MOD_VAL 255
 
 typedef enum{
 	LED_BLUE = GPIO_Pin_0,
 	LED_RED = GPIO_Pin_15,
 	LED_GREEN = GPIO_Pin_16,
 }eLED;
-
-typedef enum{
-	eButtonLeft = BTN_1,
-	eButtonRight = BTN_0,
-}eButton;
 
 typedef enum
 {
@@ -55,6 +37,7 @@ uint32_t buttonDelay[NUMBER_BUTTONS];
 
 //experimentally determined a calibration factor, it is not accurate
 #define EXPERIMENTAL_CALIB 8
+
 void cpuDelayMs(uint32_t ms)
 {
 	uint32_t counter;
@@ -66,12 +49,21 @@ void cpuDelayMs(uint32_t ms)
 	}
 }
 
+eButtonPress leftButPressState = eBtn_NotPressed;
+eButtonPress rightButPressState = eBtn_NotPressed;
+
 void PORTC_IRQHandler(void)
 {
 
-	//verify which pin was pressed
+	if(getPinInterruptStatusFlag(PORTC,eButtonRight)){
+		rightButPressState = eBtn_Pressed;
+		clearPinInterruptStatusFlag(PORTC,eButtonRight);
+	}
 
-	//set global variable OR directly take action
+	if(getPinInterruptStatusFlag(PORTC,eButtonLeft)){
+		leftButPressState = eBtn_Pressed;
+		clearPinInterruptStatusFlag(PORTC,eButtonLeft);
+	}
 
 
 }
@@ -122,7 +114,6 @@ void waitButtonRelease(eButton btn)
 }
 
 
-
 void WDOG_disable (void)
 {
 	  /* Write of the WDOG unlock key to CNT register, must be done in order to allow any modifications*/
@@ -144,26 +135,26 @@ void WDOG_disable (void)
 	  WDOG->TOVAL = (uint32_t )0xFFFF;
 }
 
-#define LEDPWN_CNTIN_VAL 0
-#define LEDPWN_MOD_VAL 255
+
 
 //Using flexible timer 0 for controlling RGB LED with PWM
 void timer0Init()
 {
 	//RCC enable timer0
 	PCC->PCC_FTM0 = PCC_PCCn_CGC_MASK;
+	PCC->PCC_PORTD = PCC_PCCn_CGC_MASK;
 
-	 setPinFunction(PORTD, LED_BLUE, eAF_pinAF2);
-     setPinFunction(PORTD, LED_RED, eAF_pinAF2);
-	 setPinFunction(PORTD, LED_GREEN, eAF_pinAF2);
+	setPinFunction(PORTD, LED_BLUE, eAF_pinAF2);
+    setPinFunction(PORTD, LED_RED, eAF_pinAF2);
+	setPinFunction(PORTD, LED_GREEN, eAF_pinAF2);
 
 	enablePWMOutput(FTM0, ePWMLED_BLUE, ePWM_enabled, LEDPWN_CNTIN_VAL, LEDPWN_MOD_VAL);
 	enablePWMOutput(FTM0, ePWMLED_RED, ePWM_enabled, LEDPWN_CNTIN_VAL, LEDPWN_MOD_VAL);
 	enablePWMOutput(FTM0, ePWMLED_GREEN, ePWM_enabled, LEDPWN_CNTIN_VAL, LEDPWN_MOD_VAL);
 
 	setPWMDUty(FTM0, ePWMLED_BLUE, 0);
-	setPWMDUty(FTM0, ePWMLED_RED, 10);
-	setPWMDUty(FTM0, ePWMLED_GREEN, 127);
+	setPWMDUty(FTM0, ePWMLED_RED, 0);
+	setPWMDUty(FTM0, ePWMLED_GREEN, 0);
 
 	//configure timer 0
 	selectClockSource(FTM0, eCS_FTM_InClk);
@@ -175,110 +166,74 @@ void init_RGB_GPIO(void)
 {
 	  setPinDirection(GPIOD, LED_BLUE, ePinDir_Output);
 	  setPinFunction(PORTD, LED_BLUE, eAF_pinGPIO);
-	  //todo set led off
+	  setPinValue(GPIOD, LED_BLUE, LED_OFF);
 
 	  setPinDirection(GPIOD, LED_RED, ePinDir_Output);
 	  setPinFunction(PORTD, LED_RED, eAF_pinGPIO);
+	  setPinValue(GPIOD, LED_RED, LED_OFF);
 
 	  setPinDirection(GPIOD, LED_GREEN, ePinDir_Output);
 	  setPinFunction(PORTD, LED_GREEN, eAF_pinGPIO);
+	  setPinValue(GPIOD, LED_GREEN, LED_OFF);
 
 }
+
 
 int main(void)
 {
-  //int counter = 0;
-  eLED whichLED = 0;
-  uint8_t currentLEDState = 0;
-  eButtonPress leftButPressState;
-  eButtonPress rightButPressState;
+	eLEDPWMChannels whichChannel = 0;
+	uint8_t dutyCycle[3] = {0,0,0};
 
-  WDOG_disable();             /* Disable Watchdog in case it is not done in startup code */
+	WDOG_disable();             /* Disable Watchdog in case it is not done in startup code */
                               /* Enable clocks to peripherals (PORT modules) */
 
+	timer0Init();
+	  //init_RGB_GPIO();
+	enableNVICInterrupt( ePORTC_IRQ_Nr );
 
+	initButtons();
 
-  //Clock Configuration
-  PCC->PORTC_CLK = PCC_PCCn_CGC_MASK;
-  PCC->PORTD_CLK = PCC_PCCn_CGC_MASK;
+	enableSingleInterrupt(PORTC, eButtonRight, eIRQC_RE);
+	enableSingleInterrupt(PORTC, eButtonLeft, eIRQC_RE);
 
-  timer0Init();
-  //init_RGB_GPIO();
+	//leftButPressState = eBtn_NotPressed;
+	//rightButPressState = eBtn_NotPressed;
 
-  uint32_t cnt;
-  uint32_t addr;
-  for(;;)
-  {
-	  cnt = FTM0->CNT;
-	  addr = &(FTM0->CNT);
-  }
-
-
-  //GPIO Configuration
-  setPinDirection(GPIOC, BTN_0, ePinDir_Input);
-  setPinFunction(PORTC, BTN_0, eAF_pinGPIO);
-  setPinPasiveFilter(PORTC, BTN_0, ePasFilter_On);
-
-  setPinDirection(GPIOC, BTN_1, ePinDir_Input);
-  setPinFunction(PORTC, BTN_1, eAF_pinGPIO);
-  setPinPasiveFilter(PORTC, BTN_1, ePasFilter_On);
-
-
-
-  for(;;)
-  {
-	leftButPressState = isPressed(eButtonLeft);
-	rightButPressState = isPressed(eButtonRight);
-
-	if( eBtn_Pressed == leftButPressState)
+	for(;;)
 	{
-		//change the led color to the next color
-		switch(whichLED)
-		{
-		case LED_BLUE:
-			whichLED = LED_RED;
-			break;
-		case LED_RED:
-			whichLED = LED_GREEN;
-			break;
-		default:
-			whichLED = LED_BLUE;
+
+		if( eBtn_Pressed == leftButPressState ){
+
+			/*switch(whichChannel){
+			case ePWMLED_RED:
+				whichChannel = ePWMLED_GREEN;
+				break;
+			case ePWMLED_GREEN:
+				whichChannel = ePWMLED_BLUE;
+				break;
+			case ePWMLED_BLUE:
+				whichChannel = ePWMLED_RED;
+				break;
+			}
+			leftButPressState = eBtn_NotPressed;*/
+
+			 setPinValue(GPIOD, LED_BLUE, LED_OFF);
+
 		}
 
-		//blink the led once to signal color change
-		turnLEDOn(whichLED);
-		cpuDelayMs(100);
-		//led will be turned off if the other button is not pressed,
-		//no need to turn it off here
+		if(  rightButPressState == eBtn_Pressed ){
 
-		waitButtonRelease(eButtonLeft);
-	}
+			/*dutyCycle[whichChannel] += 20;
 
-	if( eBtn_LongPress == rightButPressState )
-	{
-		currentLEDState = 1;
+			if( dutyCycle[whichChannel] > 255 ){
+				dutyCycle[whichChannel] = 0;
+			}
 
-		//blink the led continuously to signal that the button has been long pressed
-		//and can be released (visual feedback for user)
-		turnLEDOff(whichLED);
-		cpuDelayMs(200); //keep it off for 0.2s
+			setPWMDUty(FTM0, whichChannel, dutyCycle[whichChannel]);
+			rightButPressState = eBtn_NotPressed;*/
 
-		turnLEDOn(whichLED);
-		cpuDelayMs(300); //keep it on for 0.3s
-	}
-	else if( eBtn_Pressed == rightButPressState )
-	{
-		currentLEDState = 0;
-		turnLEDOn(whichLED);
-	}
-	else
-	{
-		if(!currentLEDState)
-		{
-			setPinValue(GPIOD, LED_BLUE, LED_OFF);
-			setPinValue(GPIOD, LED_RED, LED_OFF);
-			setPinValue(GPIOD, LED_GREEN, LED_OFF);
+			 setPinValue(GPIOD, LED_BLUE, LED_OFF);
 		}
-	}
-  }
+	  }
 }
+
