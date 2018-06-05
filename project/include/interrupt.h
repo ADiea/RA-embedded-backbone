@@ -7,37 +7,55 @@
 
 #ifndef INTERRUPT_H_
 #define INTERRUPT_H_
-#include "S32K144_small.h"
 
-// NVIC IPR register number for PORTC
-#define NVIC_IPR_REG_NR     15
+#include "system.h"
+
 #define PORTC_IRQ           61
+#define FTM1Reload_IRQ 		110
 
+/** S32_NVIC - Size of Registers Arrays */
+#define S32_NVIC_ISER_COUNT                      4u
+#define S32_NVIC_ICER_COUNT                      4u
+#define S32_NVIC_ISPR_COUNT                      4u
+#define S32_NVIC_ICPR_COUNT                      4u
+#define S32_NVIC_IABR_COUNT                      4u
+#define S32_NVIC_IP_COUNT                        123u
+
+/** S32_NVIC - Register Layout Typedef */
 typedef struct {
-	uint32_t ISER[8];
-	uint32_t RESERVED_0[24];
-	uint32_t ICER[8];
-	uint32_t RESERVED_1[24];
-	uint32_t ISPR[8];
-	uint32_t RESERVED_2[24];
-	uint32_t ICPR[8];
-	uint32_t RESERVED_3[24];
-	uint32_t IABR[8];
-}NVIC_Type;
+  uint32_t ISER[S32_NVIC_ISER_COUNT];         /**< Interrupt Set Enable Register n, array offset: 0x0, array step: 0x4 */
+       uint8_t RESERVED_0[112];
+  uint32_t ICER[S32_NVIC_ICER_COUNT];         /**< Interrupt Clear Enable Register n, array offset: 0x80, array step: 0x4 */
+       uint8_t RESERVED_1[112];
+  uint32_t ISPR[S32_NVIC_ISPR_COUNT];         /**< Interrupt Set Pending Register n, array offset: 0x100, array step: 0x4 */
+       uint8_t RESERVED_2[112];
+  uint32_t ICPR[S32_NVIC_ICPR_COUNT];         /**< Interrupt Clear Pending Register n, array offset: 0x180, array step: 0x4 */
+       uint8_t RESERVED_3[112];
+  uint32_t IABR[S32_NVIC_IABR_COUNT];         /**< Interrupt Active bit Register n, array offset: 0x200, array step: 0x4 */
+       uint8_t RESERVED_4[240];
+  uint8_t IP[S32_NVIC_IP_COUNT];              /**< Interrupt Priority Register n, array offset: 0x300, array step: 0x1 */
+       uint8_t RESERVED_5[2693];
+  uint32_t STIR;                              /**< Software Trigger Interrupt Register, offset: 0xE00 */
+} S32_NVIC_Type, *S32_NVIC_MemMapPtr;
 
-// NVIC ISER register base
-#define NVICISER_base 		(0xE000E100)
-#define NVIC				((NVIC_Type *)NVICISER_base)
+/* S32_NVIC - Peripheral instance base addresses */
+/** Peripheral S32_NVIC base address */
+#define S32_NVIC_BASE                            (0xE000E100u)
+/** Peripheral S32_NVIC base pointer */
+#define S32_NVIC                                 ((S32_NVIC_Type *)S32_NVIC_BASE)
 
+/* Specific interrupts sources based on S32K1xx_DMA_Interrupt_mapping.xlsx */
 
-// NVIC IPR register 1 byte wide
-#define NVICIPR_base 		(0xE000E400)
-#define NVICIPR				((uint8_t *)NVICIPR_base)
-
+#define NVIC_ISR_REG(isr) ((isr) / 32)
+#define NVIC_ISR_OFFSET(isr) ((isr) % 32)
 
 //
-void enableInterrupt(uint8_t IRQ);
+void NVIC_enable_IRQ(uint8_t irq, uint8_t prio);
 
-void disableInterrupt(uint8_t IRQ);
+void NVIC_disable_IRQ(uint8_t irq);
+
+void interruptsEnable(void);
+
+inline void interruptsDisable(void);
 
 #endif /* INTERRUPT_H_ */

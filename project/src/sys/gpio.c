@@ -8,7 +8,7 @@
 #include "gpio.h"
 
 
-void setPinDirection(GPIO_Type* whichGPIO, uint8_t pinNumber, ePinDirection dir)
+void GPIO_setPinDirection(GPIO_Type* whichGPIO, uint8_t pinNumber, ePinDirection dir)
 {
 	if(ePinDir_Input == dir)
 	{
@@ -20,13 +20,13 @@ void setPinDirection(GPIO_Type* whichGPIO, uint8_t pinNumber, ePinDirection dir)
 	}
 }
 
-void setPinFunction(PORT_Type* whichGPIO, uint8_t pinNumber, eAlternateFunc func)
+void GPIO_setPinFunction(PORT_Type* whichGPIO, uint8_t pinNumber, eAlternateFunc func)
 {
 	whichGPIO->PCR[pinNumber] &= ~(eAF_pinAFALL << PCR_MUX);
 	whichGPIO->PCR[pinNumber] |= (func << PCR_MUX);
 }
 
-void setPinPasiveFilter(PORT_Type* whichGPIO, uint8_t pinNumber, ePinPasFilter filter)
+void GPIO_setPinPasiveFilter(PORT_Type* whichGPIO, uint8_t pinNumber, ePinPasFilter filter)
 {
 	if(ePasFilter_Off == filter)
 	{
@@ -38,7 +38,7 @@ void setPinPasiveFilter(PORT_Type* whichGPIO, uint8_t pinNumber, ePinPasFilter f
 	}
 }
 
-void setPinValue(GPIO_Type* whichGPIO, uint8_t pinNumber, uint8_t value)
+void GPIO_setPinValue(GPIO_Type* whichGPIO, uint8_t pinNumber, uint8_t value)
 {
 	if(value)
 	{
@@ -50,12 +50,12 @@ void setPinValue(GPIO_Type* whichGPIO, uint8_t pinNumber, uint8_t value)
 	}
 }
 
-uint32_t getPinValue(GPIO_Type* whichGPIO, uint8_t pinNumber)
+uint32_t GPIO_getPinValue(GPIO_Type* whichGPIO, uint8_t pinNumber)
 {
 	return (whichGPIO->PDIR & (1<<pinNumber));
 }
 
-void configInterrupt(PORT_Type* whichPORT, uint8_t pinNumber, IRQ_Config config)
+void GPIO_configInterrupt(PORT_Type* whichPORT, uint8_t pinNumber, IRQ_Config config)
 {
 	whichPORT->PCR[pinNumber] &= ~(IRQC_ALL << PCR_IRQC);
 	whichPORT->PCR[pinNumber] |= (config << PCR_IRQC);

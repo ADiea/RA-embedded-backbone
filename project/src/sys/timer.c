@@ -7,6 +7,7 @@
 
 #include "timer.h"
 
+
 void setWriteProtection(FTM_Type* whichTimer, eWriteProtection mode)
 {
 	if(mode == eWP_enabled) {

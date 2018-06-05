@@ -6,33 +6,33 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS_QUOTED += \
-"../src/hello.c" \
+"../src/application.c" \
 
 C_SRCS += \
-../src/hello.c \
+../src/application.c \
 
 OBJS_OS_FORMAT += \
-./src/hello.o \
+./src/application.o \
 
 C_DEPS_QUOTED += \
-"./src/hello.d" \
+"./src/application.d" \
 
 OBJS += \
-./src/hello.o \
+./src/application.o \
 
 OBJS_QUOTED += \
-"./src/hello.o" \
+"./src/application.o" \
 
 C_DEPS += \
-./src/hello.d \
+./src/application.d \
 
 
 # Each subdirectory must supply rules for building sources it contributes
-src/hello.o: ../src/hello.c
+src/application.o: ../src/application.c
 	@echo 'Building file: $<'
 	@echo 'Executing target #1 $<'
 	@echo 'Invoking: Standard S32DS C Compiler'
-	arm-none-eabi-gcc "@src/hello.args" -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "src/hello.o" "$<"
+	arm-none-eabi-gcc "@src/application.args" -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "src/application.o" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

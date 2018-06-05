@@ -7,7 +7,7 @@
 
 #ifndef GPIO_H_
 #define GPIO_H_
-#include "S32K144_small.h"
+#include "system.h"
 
 //############################ GPIO(general purpose input/output) enable definitions ############################
 
@@ -202,16 +202,16 @@ typedef enum
 
 /**  API definition */
 
-void setPinDirection(GPIO_Type* whichGPIO, uint8_t pinNumber, ePinDirection dir);
+void GPIO_setPinDirection(GPIO_Type* whichGPIO, uint8_t pinNumber, ePinDirection dir);
 
-void setPinFunction(PORT_Type* whichGPIO, uint8_t pinNumber, eAlternateFunc func);
+void GPIO_setPinFunction(PORT_Type* whichGPIO, uint8_t pinNumber, eAlternateFunc func);
 
-void setPinPasiveFilter(PORT_Type* whichGPIO, uint8_t pinNumber, ePinPasFilter filter);
+void GPIO_setPinPasiveFilter(PORT_Type* whichGPIO, uint8_t pinNumber, ePinPasFilter filter);
 
-void setPinValue(GPIO_Type* whichGPIO, uint8_t pinNumber, uint8_t value);
+void GPIO_setPinValue(GPIO_Type* whichGPIO, uint8_t pinNumber, uint8_t value);
 
-uint32_t getPinValue(GPIO_Type* whichGPIO, uint8_t pinNumber);
+uint32_t GPIO_getPinValue(GPIO_Type* whichGPIO, uint8_t pinNumber);
 
-void configInterrupt(PORT_Type* whichPORT, uint8_t pinNumber, IRQ_Config config);
+void GPIO_configInterrupt(PORT_Type* whichPORT, uint8_t pinNumber, IRQ_Config config);
 
 #endif /* GPIO_H_ */

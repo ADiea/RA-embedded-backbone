@@ -1,8 +1,16 @@
 "./src/sys/startup_code/startup_S32K144.o"
+"./src/sys/timer.o"
+"./src/sys/system.o"
+"./src/sys/rgbLED.o"
+"./src/sys/potentiometer.o"
+"./src/sys/interrupt.o"
 "./src/sys/gpio.o"
-"./src/hello.o"
+"./src/sys/delay.o"
+"./src/sys/button.o"
+"./src/sys/adc.o"
+"./src/application.o"
 -T
-"C:/Users/Andrei Diea/Desktop/ra-backbone/RA-embedded-backbone/project/linker_scripts/S32K1xx_flash.ld"
+"C:/Users/Andrei/Desktop/prj/rinfacad/racad_bbone/RA-embedded-backbone/project/linker_scripts/S32K1xx_flash.ld"
 -Wl,-Map,"hello_s32k144.map"
 -Xlinker
 --gc-sections

@@ -335,7 +335,7 @@ Reset_Handler: /*entry point for reset handler, (this is also a label, since it 
 
     /* Enable interrupts and branch long (jump) to main */
     cpsie   i    /* Unmask interrupts */
-    bl      main
+    bl      sysInit
 
     /*infinite loop*/
 JumpToSelf:

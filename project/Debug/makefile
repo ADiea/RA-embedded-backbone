@@ -2,7 +2,7 @@
 # Automatically-generated file. Do not edit!
 ################################################################################
 
-#Progress monitor hint: 3
+#Progress monitor hint: 11
 first : all
 -include ../makefile.init
 
@@ -67,16 +67,16 @@ hello_s32k144.siz \
 all: warning-messages explicit-dependencies hello_s32k144.elf secondary-outputs
 
 # Tool invocations
-hello_s32k144.elf: $(OBJS) C:/Users/Andrei\ Diea/Desktop/ra-backbone/RA-embedded-backbone/project/linker_scripts/S32K1xx_flash.ld $(USER_OBJS)
+hello_s32k144.elf: $(OBJS) C:/Users/Andrei/Desktop/prj/rinfacad/racad_bbone/RA-embedded-backbone/project/linker_scripts/S32K1xx_flash.ld $(USER_OBJS)
 	@echo 'Building target: $@'
-	@echo 'Executing target #4 $@'
+	@echo 'Executing target #12 $@'
 	@echo 'Invoking: Standard S32DS C Linker'
 	arm-none-eabi-gcc -o "hello_s32k144.elf" "@hello_s32k144.args"  $(USER_OBJS_QUOTED) $(LIBS_QUOTED)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 hello_s32k144.siz: $(EXECUTABLES)
-	@echo 'Executing target #5 $@'
+	@echo 'Executing target #13 $@'
 	@echo 'Invoking: Standard S32DS Print Size'
 	arm-none-eabi-size --format=berkeley $(EXECUTABLES)
 	@echo 'Finished building: $@'

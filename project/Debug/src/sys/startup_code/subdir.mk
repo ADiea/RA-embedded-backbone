@@ -24,7 +24,7 @@ OBJS_QUOTED += \
 # Each subdirectory must supply rules for building sources it contributes
 src/sys/startup_code/startup_S32K144.o: ../src/sys/startup_code/startup_S32K144.S
 	@echo 'Building file: $<'
-	@echo 'Executing target #3 $<'
+	@echo 'Executing target #11 $<'
 	@echo 'Invoking: Standard S32DS Assembler'
 	arm-none-eabi-gcc "@src/sys/startup_code/startup_S32K144.args" -o "src/sys/startup_code/startup_S32K144.o" "$<"
 	@echo 'Finished building: $<'
