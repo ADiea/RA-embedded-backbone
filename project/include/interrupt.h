@@ -12,6 +12,9 @@
 
 #define PORTC_IRQ           61
 #define FTM1Reload_IRQ 		110
+#define FTM1Overflow_IRQ	110
+#define FTM2Overflow_IRQ	116
+#define FTM2Ch0_IRQ			111
 
 /** S32_NVIC - Size of Registers Arrays */
 #define S32_NVIC_ISER_COUNT                      4u

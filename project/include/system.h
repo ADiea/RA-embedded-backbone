@@ -20,6 +20,9 @@ typedef unsigned int uint32_t;
 typedef unsigned short uint16_t;
 typedef unsigned char uint8_t;
 
+#include "timer.h"
+#include "interrupt.h"
+
 //From S32K144.h
 
 //############################ Watchdog definitions ############################
@@ -52,7 +55,7 @@ typedef struct {
 	uint8_t RESERVED_1[8];
 	uint32_t FlexCAN0;
 	uint32_t FlexCAN1;
-	uint32_t FTM3;
+	uint32_t PCC_FTM3;
 	uint32_t ADC1;
 	uint8_t RESERVED_2[12];
 	uint32_t FlexCAN2;
@@ -67,7 +70,7 @@ typedef struct {
 	uint32_t LPIT;
 	uint32_t PCC_FTM0;
 	uint32_t PCC_FTM1;
-	uint32_t FTM2;
+	uint32_t PCC_FTM2;
 	uint32_t PCC_ADC0;
 	uint8_t RESERVED_5[4];
 	uint32_t RTC;
@@ -178,6 +181,12 @@ typedef struct {
 #define SCG_RCCR_SCS(x)                          (((uint32_t)(((uint32_t)(x))<<SCG_RCCR_SCS_SHIFT))&SCG_RCCR_SCS_MASK)
 
 
+
+void systickInit(void);
+
+uint32_t getMsTicks(void);
+
+//void Delay( uint32_t ms );
 
 void sysInit(void);
 

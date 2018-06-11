@@ -91,3 +91,28 @@ void setPWMDUty(FTM_Type* whichTimer, eFTMChannel whichChannel, uint32_t duty)
 	uint32_t *pChannelConfig = TIMER_CH_V(whichTimer, whichChannel);
 	*pChannelConfig  = duty;
 }
+
+void enableUpcounting(FTM_Type* whichTimer, uint32_t cntin, uint32_t mod){
+
+	whichTimer->CNT = 0;
+	whichTimer->CNTIN = cntin;
+	whichTimer->MOD = mod;
+
+}
+
+void enableInterrupt(FTM_Type* whichTimer){
+	whichTimer->SC |= (1 << SC_TOIE);
+}
+
+void disableInterrupt(FTM_Type* whichTimer){
+	whichTimer->SC &= ~(1 << SC_TOIE);
+}
+
+void clearInterruptFlag(FTM_Type* whichTimer){
+	getInterruptFlag(whichTimer);
+	whichTimer->SC &= ~(1 << SC_TOF);
+}
+
+uint32_t getInterruptFlag(FTM_Type* whichTimer){
+	return (whichTimer->SC & (1<<SC_TOF));
+}

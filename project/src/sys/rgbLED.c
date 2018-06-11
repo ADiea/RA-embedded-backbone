@@ -57,12 +57,15 @@ void rgbLED_initGPIO(void)
 
 	  GPIO_setPinDirection(GPIOD, LED_BLUE, ePinDir_Output);
 	  GPIO_setPinFunction(PORTD, LED_BLUE, eAF_pinGPIO);
+	  turnLEDOff(LED_BLUE);
 
 	  GPIO_setPinDirection(GPIOD, LED_RED, ePinDir_Output);
 	  GPIO_setPinFunction(PORTD, LED_RED, eAF_pinGPIO);
+	  turnLEDOff(LED_RED);
 
 	  GPIO_setPinDirection(GPIOD, LED_GREEN, ePinDir_Output);
 	  GPIO_setPinFunction(PORTD, LED_GREEN, eAF_pinGPIO);
+	  turnLEDOff(LED_GREEN);
 }
 
 void initLED(eLEDControlType control)

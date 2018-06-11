@@ -62,7 +62,7 @@ void onRightBtnPressedResetValue(void)
 //this is the application entry point it is called from sysInit()
 void applicationEntryPoint(void)
 {
-  uint32_t potValue;
+  /*uint32_t potValue;
   //perform initialization of needed modules. In the background various peripherals get inited
   initLED(eLEDCtrl_PWM);
   initSystemButtons();
@@ -71,17 +71,29 @@ void applicationEntryPoint(void)
   //rgister callback functions for left and right buttons
   registerBtnPressFn(eButtonLeft, onLeftBtnPressed);
   //registerBtnPressFn(eButtonRight, onRightBtnPressedIncrement);
-  registerBtnPressFn(eButtonRight, onRightBtnPressedResetValue);
+  registerBtnPressFn(eButtonRight, onRightBtnPressedResetValue);*/
+
+  //systickInit();
+  initLED(eLEDCtrl_GPIO);
+  turnLEDOn(LED_BLUE);
+  uint32_t time = getMsTicks();
 
   //main application loop, our application has to set the color of the LED
   while(1)
   {
-	//read the potentiometer ...
+	/*//read the potentiometer ...
 	potValue = (readPotentiometer() * MAX_LED_BRIGHTNESS) / MAX_POT_VALUE; //here we perform a int division we don't do (pot / max_pot) * max_led
 	// ... and adjust the current color value between 0 and 255 (PWM factor)
 	*g_whichColor = (uint8_t) potValue;
 
 	//set current color
-	setRgbLEDColor(g_factorR, g_factorG, g_factorB);
+	setRgbLEDColor(g_factorR, g_factorG, g_factorB);*/
+
+
+	if( (getMsTicks() - time ) > 1){
+		turnLEDOff(LED_BLUE);
+	}
+	//Delay(5000);
+	//turnLEDOff(LED_BLUE);
   }
 }
