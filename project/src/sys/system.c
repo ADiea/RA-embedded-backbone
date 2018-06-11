@@ -6,6 +6,7 @@
  */
 #include "system.h"
 
+
 //define the application entry point
 extern void applicationEntryPoint(void);
 
@@ -179,6 +180,45 @@ void WDOG_disable (void)
 	  WDOG->TOVAL = (uint32_t )0xFFFF;
 }
 
+volatile uint32_t msTicks;
+volatile uint32_t timeStamp;
+volatile uint32_t msDelay;
+
+void FTM2_Ovf_Reload_IRQHandler(void){
+	clearInterruptFlag(FTM2);
+	msTicks++;
+}
+
+void systickInit(void){
+
+	msTicks = 0;
+
+	PCC->PCC_FTM2 = PCC_PCCn_CGC_MASK;
+
+	NVIC_enable_IRQ(FTM2Overflow_IRQ, 0x0);
+
+	enableUpcounting(FTM2, 0, 39999);
+
+	enableInterrupt(FTM2);
+
+	selectPrescaleFactor(FTM2, ePF_DivBy2);
+	selectClockSource(FTM2, eCS_FTM_InClk);
+
+}
+
+uint32_t getMsTicks(void){
+	return msTicks;
+}
+
+/*void nbDelay( uint32_t ms ){
+	timeStamp = getMsTicks();
+	msDelay = ms;
+}
+
+uint8_t nbElapsed(){
+	return( (getMsTicks() - timeStamp) >= msDelay );
+}*/
+
 void sysInit(void)
 {
 	  init_data_bss();
@@ -188,6 +228,9 @@ void sysInit(void)
 	  SOSC_init_8MHz();      /* Initialize system oscillator for 8 MHz xtal */
 	  SPLL_init_160MHz();    /* Initialize SPLL to 160 MHz with 8 MHz SOSC */
 	  NormalRUNmode_80MHz(); /* Init clocks: 80 MHz sysclk & core, 40 MHz bus, 20 MHz flash */
+
+
+	  systickInit();
 
 	  // we could exit priviledged mode here to limit further configurations
 	  // call application code, that uses system functionality to implement application logic

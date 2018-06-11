@@ -1,6 +1,8 @@
 project/Debug/*
 project/.cproject
 project/.project
+project/.settings
+project/Project_Settings
 # Prerequisites
 *.d
 

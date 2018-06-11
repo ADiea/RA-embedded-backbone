@@ -171,4 +171,14 @@ void enablePWMOutput(FTM_Type* whichTimer, eFTMChannel whichChannel, ePWMoutput 
 
 void setPWMDUty(FTM_Type* whichTimer, eFTMChannel whichChannel, uint32_t duty);
 
+void enableUpcounting(FTM_Type* whichTimer, uint32_t cntin, uint32_t mod);
+
+void enableInterrupt(FTM_Type* whichTimer);
+
+void disableInterrupt(FTM_Type* whichTimer);
+
+void clearInterruptFlag(FTM_Type* whichTimer);
+
+uint32_t getInterruptFlag(FTM_Type* whichTimer);
+
 #endif /* TIMER_H_ */
